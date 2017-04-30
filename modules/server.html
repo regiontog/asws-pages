@@ -1,0 +1,212 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Socket &#8212; asws 1.0.0a documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0.0a',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Writer" href="writer.html" />
+    <link rel="prev" title="Reasons" href="reason.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-websocket.server">
+<span id="socket"></span><h1>Socket<a class="headerlink" href="#module-websocket.server" title="Permalink to this headline">¶</a></h1>
+<p>Usage:
+&gt;&gt;&gt; loop = asyncio.get_event_loop()
+&gt;&gt;&gt; socket = WebSocketServer(&#8220;localhost&#8221;, 3001, loop=loop)
+&gt;&gt;&gt;
+&gt;&gt;&gt; &#64;socket.connection
+&gt;&gt;&gt; async def on_connection(client: Client):
+...     logger.info(f&#8217;Connection from {client.addr, client.port}&#8217;)
+...     logger.info(f&#8217;All clients: {socket.clients}&#8217;)
+...
+...     &#64;client.message
+...     async def on_message(reader: WebSocketReader):
+...         await client.writer.send(await reader.get())
+&gt;&gt;&gt;
+&gt;&gt;&gt; with socket as server:
+...     logger.info(f&#8217;Serving on {server.sockets[0].getsockname()}&#8217;)
+...     loop.run_forever()
+&gt;&gt;&gt;
+&gt;&gt;&gt; loop.close()</p>
+<dl class="class">
+<dt id="websocket.server.WebSocketServer">
+<em class="property">class </em><code class="descclassname">websocket.server.</code><code class="descname">WebSocketServer</code><span class="sig-paren">(</span><em>addr</em>, <em>port</em>, <em>certs=None</em>, <em>loop=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/websocket/server.html#WebSocketServer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#websocket.server.WebSocketServer" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><ul class="first last simple">
+<li><strong>addr</strong> &#8211; The server IPv4 or IPv6 address.</li>
+<li><strong>port</strong> &#8211; The server port.</li>
+<li><strong>certs</strong> &#8211; SSL certifications</li>
+<li><strong>clients</strong> &#8211; All of the connected clients.</li>
+<li><strong>loop</strong> &#8211; The event loop to run in.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="websocket.server.WebSocketServer.connection">
+<code class="descname">connection</code><span class="sig-paren">(</span><em>fn</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/websocket/server.html#WebSocketServer.connection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#websocket.server.WebSocketServer.connection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decorator for registering the on_connection callback.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>fn</strong> &#8211; The callback to register.</td>
+</tr>
+</tbody>
+</table>
+<p>The callback should be async and take one parameter, <a class="reference internal" href="client.html#websocket.client.Client" title="websocket.client.Client"><code class="xref py py-class docutils literal"><span class="pre">Client</span></code></a>.
+This callback is called when a new client connects with the websocket.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nd">@socket</span><span class="o">.</span><span class="n">connection</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">async</span> <span class="k">def</span> <span class="nf">on_connection</span><span class="p">(</span><span class="n">client</span><span class="p">:</span> <span class="n">Client</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">for</span> <span class="n">other_client</span> <span class="ow">in</span> <span class="n">socket</span><span class="o">.</span><span class="n">clients</span><span class="o">.</span><span class="n">vals</span><span class="p">():</span>
+<span class="gp">... </span>        <span class="n">other_client</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s2">&quot;New client connected.&quot;</span><span class="p">)</span>
+<span class="gp">... </span>    
+<span class="gp">... </span>    <span class="nd">@client</span><span class="o">.</span><span class="n">message</span>
+<span class="gp">... </span>    <span class="k">async</span> <span class="k">def</span> <span class="nf">on_message</span><span class="p">(</span><span class="n">reader</span><span class="p">:</span> <span class="n">WebSocketReader</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="k">await</span> <span class="n">reader</span><span class="o">.</span><span class="n">get</span><span class="p">())</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="websocket.server.WebSocketServer.disconnect_client">
+<code class="descname">disconnect_client</code><span class="sig-paren">(</span><em>client</em>, <em>port=None</em>, <em>code=b'\x03\xe8'</em>, <em>reason=''</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/websocket/server.html#WebSocketServer.disconnect_client"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#websocket.server.WebSocketServer.disconnect_client" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method is the only clean way to close a connection with a client.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nd">@socket</span><span class="o">.</span><span class="n">connection</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">async</span> <span class="k">def</span> <span class="nf">on_connection</span><span class="p">(</span><span class="n">client</span><span class="p">:</span> <span class="n">Client</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Client connected, disconnecting it...&quot;</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="n">socket</span><span class="o">.</span><span class="n">disconnect_client</span><span class="p">(</span><span class="n">client</span><span class="p">)</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>client</strong> &#8211; Depends on port parameter.</li>
+<li><strong>port</strong> &#8211; If port is None try to disconnect client, else interpret client as the client address</li>
+<li><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bytes" title="(in Python v3.6)"><em>bytes</em></a>) &#8211; The code to close the connection with, make sure it is valid. 99% of the time it should be <code class="xref py py-attr docutils literal"><span class="pre">websocket.reasons.Reasons.NORMAL.value.code</span></code></li>
+<li><strong>reason</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) &#8211; The reason for closing the connection, may be &#8216;&#8217;. Should not be longer than 123 characters.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="websocket.server.WebSocketServer.wait">
+<code class="descname">wait</code><span class="sig-paren">(</span><em>fut</em>, <em>timeout</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/websocket/server.html#WebSocketServer.wait"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#websocket.server.WebSocketServer.wait" title="Permalink to this definition">¶</a></dt>
+<dd><p>Helper method for creating a future that times out after a timeout.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>fut</strong> &#8211; The future to time.</li>
+<li><strong>timeout</strong> &#8211; The timeout in seconds.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">future</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="reason.html" title="previous chapter">Reasons</a></li>
+      <li>Next: <a href="writer.html" title="next chapter">Writer</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/modules/server.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Erlend Tobiassen.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="../_sources/modules/server.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

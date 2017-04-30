@@ -1,0 +1,301 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>websocket.server &#8212; asws 1.0.0a documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0.0a',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for websocket.server</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Usage:</span>
+<span class="sd">&gt;&gt;&gt; loop = asyncio.get_event_loop()</span>
+<span class="sd">&gt;&gt;&gt; socket = WebSocketServer(&quot;localhost&quot;, 3001, loop=loop)</span>
+<span class="sd">&gt;&gt;&gt;</span>
+<span class="sd">&gt;&gt;&gt; @socket.connection</span>
+<span class="sd">&gt;&gt;&gt; async def on_connection(client: Client):</span>
+<span class="sd">...     logger.info(f&#39;Connection from {client.addr, client.port}&#39;)</span>
+<span class="sd">...     logger.info(f&#39;All clients: {socket.clients}&#39;)</span>
+<span class="sd">...</span>
+<span class="sd">...     @client.message</span>
+<span class="sd">...     async def on_message(reader: WebSocketReader):</span>
+<span class="sd">...         await client.writer.send(await reader.get())</span>
+<span class="sd">&gt;&gt;&gt;</span>
+<span class="sd">&gt;&gt;&gt; with socket as server:</span>
+<span class="sd">...     logger.info(f&#39;Serving on {server.sockets[0].getsockname()}&#39;)</span>
+<span class="sd">...     loop.run_forever()</span>
+<span class="sd">&gt;&gt;&gt;</span>
+<span class="sd">&gt;&gt;&gt; loop.close()</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">asyncio</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">ssl</span>
+
+<span class="kn">from</span> <span class="nn">.client</span> <span class="k">import</span> <span class="n">Client</span><span class="p">,</span> <span class="n">HANDLERS</span>
+<span class="kn">from</span> <span class="nn">.enums</span> <span class="k">import</span> <span class="n">State</span>
+<span class="kn">from</span> <span class="nn">.http</span> <span class="k">import</span> <span class="n">handshake</span>
+<span class="kn">from</span> <span class="nn">.reasons</span> <span class="k">import</span> <span class="n">Reasons</span>
+<span class="kn">from</span> <span class="nn">.stream.reader</span> <span class="k">import</span> <span class="n">WebSocketReader</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="WebSocketServer"><a class="viewcode-back" href="../../modules/server.html#websocket.server.WebSocketServer">[docs]</a><span class="k">class</span> <span class="nc">WebSocketServer</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :ivar addr: The server IPv4 or IPv6 address.</span>
+<span class="sd">    :type addr: str</span>
+<span class="sd">    :ivar port: The server port.</span>
+<span class="sd">    :type port: int</span>
+<span class="sd">    :ivar certs: SSL certifications</span>
+<span class="sd">    :type certs: (certfile, keyfile)</span>
+<span class="sd">    :ivar clients: All of the connected clients.</span>
+<span class="sd">    :type clients: {(str, int): Client}</span>
+<span class="sd">    :ivar loop: The event loop to run in.</span>
+<span class="sd">    :type loop: AbstractEventLoop </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">NEWLINE</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\r\n</span><span class="s1">&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">addr</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">certs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">loop</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">loop</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">loop</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">get_event_loop</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">loop</span> <span class="o">=</span> <span class="n">loop</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_on_connection</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addr</span> <span class="o">=</span> <span class="n">addr</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">port</span> <span class="o">=</span> <span class="n">port</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">certs</span> <span class="o">=</span> <span class="n">certs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clients</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">def</span> <span class="nf">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Start the server when entering the context manager.&quot;&quot;&quot;</span>
+        <span class="n">context</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">certs</span><span class="p">:</span>
+            <span class="n">crt</span><span class="p">,</span> <span class="n">key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">certs</span>
+            <span class="n">context</span> <span class="o">=</span> <span class="n">ssl</span><span class="o">.</span><span class="n">create_default_context</span><span class="p">(</span><span class="n">ssl</span><span class="o">.</span><span class="n">Purpose</span><span class="o">.</span><span class="n">SERVER_AUTH</span><span class="p">)</span>
+            <span class="n">context</span><span class="o">.</span><span class="n">load_cert_chain</span><span class="p">(</span><span class="n">certfile</span><span class="o">=</span><span class="n">crt</span><span class="p">,</span> <span class="n">keyfile</span><span class="o">=</span><span class="n">key</span><span class="p">)</span>
+
+        <span class="n">coro</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">start_server</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">socket_connect</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">addr</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">,</span> <span class="n">loop</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">loop</span><span class="p">,</span> <span class="n">ssl</span><span class="o">=</span><span class="n">context</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loop</span><span class="o">.</span><span class="n">run_until_complete</span><span class="p">(</span><span class="n">coro</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">server</span>
+
+    <span class="k">def</span> <span class="nf">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_val</span><span class="p">,</span> <span class="n">exc_tb</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Stop server when exiting context manager&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loop</span><span class="o">.</span><span class="n">run_until_complete</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">disconnect_all</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loop</span><span class="o">.</span><span class="n">run_until_complete</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">wait_closed</span><span class="p">())</span>
+
+<div class="viewcode-block" id="WebSocketServer.connection"><a class="viewcode-back" href="../../modules/server.html#websocket.server.WebSocketServer.connection">[docs]</a>    <span class="k">def</span> <span class="nf">connection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Decorator for registering the on_connection callback.</span>
+<span class="sd">        </span>
+<span class="sd">        :param fn: The callback to register.</span>
+<span class="sd">        </span>
+<span class="sd">        The callback should be async and take one parameter, :class:`~websocket.client.Client`.</span>
+<span class="sd">        This callback is called when a new client connects with the websocket.</span>
+
+<span class="sd">        &gt;&gt;&gt; @socket.connection</span>
+<span class="sd">        &gt;&gt;&gt; async def on_connection(client: Client):</span>
+<span class="sd">        ...     for other_client in socket.clients.vals():</span>
+<span class="sd">        ...         other_client.writer.send(&quot;New client connected.&quot;)</span>
+<span class="sd">        ...     </span>
+<span class="sd">        ...     @client.message</span>
+<span class="sd">        ...     async def on_message(reader: WebSocketReader):</span>
+<span class="sd">        ...         await client.writer.send(await reader.get())</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_on_connection</span> <span class="o">=</span> <span class="n">fn</span></div>
+
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">connect_client</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">client</span><span class="p">):</span>
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_on_connection</span><span class="p">(</span><span class="n">client</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clients</span><span class="p">[</span><span class="n">client</span><span class="o">.</span><span class="n">addr</span><span class="p">,</span> <span class="n">client</span><span class="o">.</span><span class="n">port</span><span class="p">]</span> <span class="o">=</span> <span class="n">client</span>
+
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">disconnect_all</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">done</span><span class="p">,</span> <span class="n">pending</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">disconnect_client</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">clients</span><span class="o">.</span><span class="n">values</span><span class="p">()),</span> <span class="n">loop</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">loop</span><span class="p">,</span>
+                                           <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
+
+        <span class="n">number_pending</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">pending</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">number_pending</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;</span><span class="si">{number_pending}</span><span class="s2"> futures failed to disconnect in </span><span class="si">{timeout}</span><span class="s2"> second(s), cancelling them.&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">future</span> <span class="ow">in</span> <span class="n">pending</span><span class="p">:</span>
+                <span class="n">future</span><span class="o">.</span><span class="n">cancel</span><span class="p">()</span>
+
+<div class="viewcode-block" id="WebSocketServer.disconnect_client"><a class="viewcode-back" href="../../modules/server.html#websocket.server.WebSocketServer.disconnect_client">[docs]</a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">disconnect_client</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">client</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Reasons</span><span class="o">.</span><span class="n">NORMAL</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">code</span><span class="p">,</span> <span class="n">reason</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;This method is the only clean way to close a connection with a client.</span>
+<span class="sd">        </span>
+<span class="sd">        &gt;&gt;&gt; @socket.connection</span>
+<span class="sd">        &gt;&gt;&gt; async def on_connection(client: Client):</span>
+<span class="sd">        ...     print(&quot;Client connected, disconnecting it...&quot;)</span>
+<span class="sd">        ...     socket.disconnect_client(client)</span>
+
+<span class="sd">        :param client: Depends on port parameter.</span>
+<span class="sd">        :param port: If port is None try to disconnect client, else interpret client as the client address</span>
+<span class="sd">        :param code: The code to close the connection with, make sure it is valid. 99% of the time it should be :attr:`websocket.reasons.Reasons.NORMAL.value.code`</span>
+<span class="sd">        :type code: bytes</span>
+<span class="sd">        :param reason: The reason for closing the connection, may be &#39;&#39;. Should not be longer than 123 characters.</span>
+<span class="sd">        :type reason: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">port</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">client</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">clients</span><span class="p">[</span><span class="n">client</span><span class="p">,</span> <span class="n">port</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="k">return</span>  <span class="c1"># Client does not exist, nothing to to</span>
+
+        <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">reason</span><span class="p">)</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">clients</span><span class="p">[</span><span class="n">client</span><span class="o">.</span><span class="n">addr</span><span class="p">,</span> <span class="n">client</span><span class="o">.</span><span class="n">port</span><span class="p">]</span></div>
+
+    <span class="k">def</span> <span class="nf">delete_client</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">addr</span><span class="p">,</span> <span class="n">port</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">clients</span><span class="p">[</span><span class="n">addr</span><span class="p">,</span> <span class="n">port</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">socket_connect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reader</span><span class="p">,</span> <span class="n">writer</span><span class="p">):</span>
+        <span class="n">addr</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="o">*</span><span class="n">_</span> <span class="o">=</span> <span class="n">writer</span><span class="o">.</span><span class="n">get_extra_info</span><span class="p">(</span><span class="s1">&#39;peername&#39;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Client {addr, port} connected, attempting handshake.&quot;</span><span class="p">)</span>
+            <span class="n">state</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">handle_handshake</span><span class="p">(</span><span class="n">reader</span><span class="p">,</span> <span class="n">writer</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">state</span> <span class="o">!=</span> <span class="n">State</span><span class="o">.</span><span class="n">OPEN</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Handshake with client {addr, port} failed.&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Handshake with client {addr, port} successful.&quot;</span><span class="p">)</span>
+                <span class="n">client</span> <span class="o">=</span> <span class="n">Client</span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">addr</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">writer</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">loop</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">loop</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">connect_client</span><span class="p">(</span><span class="n">client</span><span class="p">))</span>
+
+                <span class="k">while</span> <span class="n">client</span><span class="o">.</span><span class="n">state</span> <span class="o">!=</span> <span class="n">State</span><span class="o">.</span><span class="n">CLOSING</span><span class="p">:</span>
+                    <span class="n">client</span><span class="o">.</span><span class="n">read_task</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loop</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span><span class="n">reader</span><span class="o">.</span><span class="n">readexactly</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">data</span> <span class="o">=</span> <span class="p">(</span><span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">read_task</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="k">if</span> <span class="n">data</span> <span class="o">&amp;</span> <span class="n">WebSocketReader</span><span class="o">.</span><span class="n">RSV_BITS</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;No extension defining RSV meaning has been negotiated&quot;</span><span class="p">)</span>
+                            <span class="n">client</span><span class="o">.</span><span class="n">ensure_clean_close</span><span class="p">()</span>
+                            <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">close_with_read</span><span class="p">(</span><span class="n">reader</span><span class="p">,</span> <span class="n">Reasons</span><span class="o">.</span><span class="n">PROTOCOL_ERROR</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="s2">&quot;RSV bit(s) set&quot;</span><span class="p">)</span>
+                            <span class="k">continue</span>
+
+                        <span class="c1"># Find the correct handler based on the opcode</span>
+                        <span class="c1"># Then pass it its arguments, including the fin flag</span>
+                        <span class="k">await</span> <span class="n">HANDLERS</span><span class="p">[</span><span class="n">data</span> <span class="o">&amp;</span> <span class="n">WebSocketReader</span><span class="o">.</span><span class="n">OP_CODE_BITS</span><span class="p">](</span><span class="n">client</span><span class="p">,</span> <span class="n">reader</span><span class="p">,</span>
+                                                                            <span class="p">(</span><span class="n">data</span> <span class="o">&amp;</span> <span class="n">WebSocketReader</span><span class="o">.</span><span class="n">FIN_BIT</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">CancelledError</span><span class="p">:</span>
+                        <span class="k">continue</span>  <span class="c1"># Someone has cancelled the read task, check for new state</span>
+        <span class="k">except</span> <span class="ne">ConnectionResetError</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Client {addr, port} has forcibly closed the connection.&quot;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">raise</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Closing connection with client {addr, port}.&quot;</span><span class="p">)</span>
+            <span class="n">writer</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">delete_client</span><span class="p">(</span><span class="n">addr</span><span class="p">,</span> <span class="n">port</span><span class="p">)</span>
+
+<div class="viewcode-block" id="WebSocketServer.wait"><a class="viewcode-back" href="../../modules/server.html#websocket.server.WebSocketServer.wait">[docs]</a>    <span class="k">def</span> <span class="nf">wait</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fut</span><span class="p">,</span> <span class="n">timeout</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Helper method for creating a future that times out after a timeout.</span>
+<span class="sd">        </span>
+<span class="sd">        :param fut: The future to time.</span>
+<span class="sd">        :param timeout: The timeout in seconds.</span>
+<span class="sd">        </span>
+<span class="sd">        :return: future</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">wait_for</span><span class="p">(</span><span class="n">fut</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">,</span> <span class="n">loop</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">loop</span><span class="p">)</span></div>
+
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">handle_handshake</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reader</span><span class="p">,</span> <span class="n">writer</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">request_line</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="n">reader</span><span class="o">.</span><span class="n">readuntil</span><span class="p">(</span><span class="n">WebsocketServer</span><span class="o">.</span><span class="n">NEWLINE</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+
+            <span class="n">request</span> <span class="o">=</span> <span class="n">handshake</span><span class="o">.</span><span class="n">Request</span><span class="p">(</span><span class="n">request_line</span><span class="o">.</span><span class="n">decode</span><span class="p">())</span>
+            <span class="n">header</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="n">reader</span><span class="o">.</span><span class="n">readuntil</span><span class="p">(</span><span class="n">WebsocketServer</span><span class="o">.</span><span class="n">NEWLINE</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+
+            <span class="k">while</span> <span class="n">header</span> <span class="o">!=</span> <span class="n">WebsocketServer</span><span class="o">.</span><span class="n">NEWLINE</span><span class="p">:</span>
+                <span class="n">request</span><span class="o">.</span><span class="n">header</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">decode</span><span class="p">())</span>
+                <span class="n">header</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="n">reader</span><span class="o">.</span><span class="n">readuntil</span><span class="p">(</span><span class="n">WebsocketServer</span><span class="o">.</span><span class="n">NEWLINE</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+
+            <span class="n">response</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">validate_websocket_request</span><span class="p">()</span>
+            <span class="n">writer</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">State</span><span class="o">.</span><span class="n">OPEN</span>
+        <span class="k">except</span> <span class="n">handshake</span><span class="o">.</span><span class="n">BadRequestException</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s2">&quot;Failed to handshake.&quot;</span><span class="p">)</span>
+            <span class="n">writer</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">handshake</span><span class="o">.</span><span class="n">BadRequestException</span><span class="o">.</span><span class="n">RESPONSE</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">State</span><span class="o">.</span><span class="n">CLOSING</span>
+        <span class="k">except</span> <span class="p">(</span><span class="n">asyncio</span><span class="o">.</span><span class="n">streams</span><span class="o">.</span><span class="n">IncompleteReadError</span><span class="p">,</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">TimeoutError</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s2">&quot;Could not read stream, not http. Possibly https?.&quot;</span><span class="p">)</span>
+            <span class="n">writer</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">handshake</span><span class="o">.</span><span class="n">BadRequestException</span><span class="o">.</span><span class="n">RESPONSE</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">State</span><span class="o">.</span><span class="n">CLOSING</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="k">await</span> <span class="n">writer</span><span class="o">.</span><span class="n">drain</span><span class="p">()</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Erlend Tobiassen.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

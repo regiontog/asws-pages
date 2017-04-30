@@ -1,0 +1,217 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Client &#8212; asws 1.0.0a documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0.0a',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Enums" href="enums.html" />
+    <link rel="prev" title="Welcome to asws’s documentation!" href="../index.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-websocket.client">
+<span id="client"></span><h1>Client<a class="headerlink" href="#module-websocket.client" title="Permalink to this headline">¶</a></h1>
+<p>You should not make an instance of the Client class yourself, rather you should listen for new connections with 
+<code class="xref py py-meth docutils literal"><span class="pre">connection()</span></code></p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nd">@socket</span><span class="o">.</span><span class="n">connection</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">async</span> <span class="k">def</span> <span class="nf">on_connection</span><span class="p">(</span><span class="n">client</span><span class="p">:</span> <span class="n">Client</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="c1"># Here you can use the client, register callbacks on it or send it messages</span>
+<span class="gp">... </span>    <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">ping</span><span class="p">()</span>
+</pre></div>
+</div>
+<dl class="class">
+<dt id="websocket.client.Client">
+<em class="property">class </em><code class="descclassname">websocket.client.</code><code class="descname">Client</code><span class="sig-paren">(</span><em>state</em>, <em>addr</em>, <em>port</em>, <em>writer</em>, <em>loop</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/websocket/client.html#Client"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#websocket.client.Client" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><ul class="first last simple">
+<li><strong>addr</strong> &#8211; IPv4 or IPv6 address of the client.</li>
+<li><strong>port</strong> &#8211; The port the client opened it&#8217;s socket on.</li>
+<li><a class="reference internal" href="writer.html#module-websocket.stream.writer" title="websocket.stream.writer"><strong>writer</strong></a> &#8211; The writer used for writing frames to the client.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="websocket.client.Client.closed">
+<code class="descname">closed</code><span class="sig-paren">(</span><em>fn</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/websocket/client.html#Client.closed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#websocket.client.Client.closed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decorator for registering the on_closed callback.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>fn</strong> &#8211; The callback to register.</td>
+</tr>
+</tbody>
+</table>
+<p>The callback should be async and take two parameters, <a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bytes" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">bytes</span></code></a> code of length 2, and <a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a> reason.
+This callback is called when the connection this this client is closing.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nd">@client</span><span class="o">.</span><span class="n">closed</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">async</span> <span class="k">def</span> <span class="nf">on_closed</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">reason</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Connection with client is closing for &quot;</span> <span class="o">+</span> <span class="n">reason</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="websocket.client.Client.message">
+<code class="descname">message</code><span class="sig-paren">(</span><em>fn</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/websocket/client.html#Client.message"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#websocket.client.Client.message" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decorator for registering the on_message callback.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>fn</strong> &#8211; The callback to register.</td>
+</tr>
+</tbody>
+</table>
+<p>The callback should be async and take one parameter, a <a class="reference internal" href="reader.html#websocket.stream.reader.WebSocketReader" title="websocket.stream.reader.WebSocketReader"><code class="xref py py-class docutils literal"><span class="pre">WebSocketReader</span></code></a></p>
+<p>This callback is called when the server receives an valid data frame, 
+if an exception occurs after the first valid frame e.g. if an text frame 
+contains invalid utf-8, or if it&#8217;s an invalid fragmented message, then we 
+send the exception to the reader with <a class="reference external" href="https://docs.python.org/3.6/library/asyncio-stream.html#asyncio.StreamReader.set_exception" title="(in Python v3.6)"><code class="xref py py-meth docutils literal"><span class="pre">set_exception()</span></code></a>.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nd">@client</span><span class="o">.</span><span class="n">message</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">async</span> <span class="k">def</span> <span class="nf">on_message</span><span class="p">(</span><span class="n">reader</span><span class="p">:</span> <span class="n">WebSocketReader</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Got message &quot;</span> <span class="o">+</span> <span class="k">await</span> <span class="n">reader</span><span class="o">.</span><span class="n">get</span><span class="p">())</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="websocket.client.Client.ping">
+<code class="descname">ping</code><span class="sig-paren">(</span><em>fn</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/websocket/client.html#Client.ping"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#websocket.client.Client.ping" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decorator for registering the on_ping callback.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>fn</strong> &#8211; The callback to register.</td>
+</tr>
+</tbody>
+</table>
+<p>If you set this callback you will override the default behaviour of sending pongs back to the client when 
+receiving pings. If you want to keep this behaviour call <a class="reference internal" href="writer.html#websocket.stream.writer.WebSocketWriter.pong" title="websocket.stream.writer.WebSocketWriter.pong"><code class="xref py py-meth docutils literal"><span class="pre">pong()</span></code></a>.</p>
+<p>The callback should be async and take two parameters, <a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bytes" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">bytes</span></code></a> payload, and <a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">int</span></code></a> length.
+This callback is called when we receive a valid ping from the client.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nd">@client</span><span class="o">.</span><span class="n">ping</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">async</span> <span class="k">def</span> <span class="nf">on_ping</span><span class="p">(</span><span class="n">payload</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Received ping from client&quot;</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">pong</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="n">payload</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="websocket.client.Client.pong">
+<code class="descname">pong</code><span class="sig-paren">(</span><em>fn</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/websocket/client.html#Client.pong"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#websocket.client.Client.pong" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decorator for registering the on_pong callback.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>fn</strong> &#8211; The callback to register.</td>
+</tr>
+</tbody>
+</table>
+<p>The callback should be async and take two parameters, <a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bytes" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">bytes</span></code></a> payload, and <a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">int</span></code></a> length
+This callback is called when we receive a valid pong from the client.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nd">@client</span><span class="o">.</span><span class="n">pong</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">async</span> <span class="k">def</span> <span class="nf">on_pong</span><span class="p">(</span><span class="n">payload</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Received pong from client&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="../index.html" title="previous chapter">Welcome to asws&#8217;s documentation!</a></li>
+      <li>Next: <a href="enums.html" title="next chapter">Enums</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/modules/client.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Erlend Tobiassen.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="../_sources/modules/client.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

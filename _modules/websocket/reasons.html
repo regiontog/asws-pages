@@ -1,0 +1,224 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>websocket.reasons &#8212; asws 1.0.0a documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0.0a',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for websocket.reasons</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">struct</span>
+<span class="kn">from</span> <span class="nn">enum</span> <span class="k">import</span> <span class="n">Enum</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="Reason"><a class="viewcode-back" href="../../modules/reason.html#websocket.reasons.Reason">[docs]</a><span class="k">class</span> <span class="nc">Reason</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
+    <span class="n">INSTANCES</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">Reason</span><span class="o">.</span><span class="n">INSTANCES</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Duplicate entry.&quot;</span><span class="p">)</span>
+
+        <span class="n">Reason</span><span class="o">.</span><span class="n">INSTANCES</span><span class="p">[</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">code</span> <span class="o">=</span> <span class="n">code</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+
+    <span class="k">def</span> <span class="nf">set_description</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">desc</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">desc</span>
+
+    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="Reason.get"><a class="viewcode-back" href="../../modules/reason.html#websocket.reasons.Reason.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">code</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;This is the accepted way to dynamically acquire an Reason object. Prefer to </span>
+<span class="sd">        use Enum :class:`~websocket.reasons.Reasons` when possible.</span>
+<span class="sd">        </span>
+<span class="sd">        :param code: The code of the reason object you wish to get.</span>
+<span class="sd">        </span>
+<span class="sd">        :return: :class:`~websocket.reasons.Reason`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">Reason</span><span class="o">.</span><span class="n">INSTANCES</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Reason</span><span class="o">.</span><span class="n">INSTANCES</span><span class="p">[</span><span class="n">code</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Reason</span><span class="p">(</span><span class="n">code</span><span class="p">)</span></div>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">from_bytes</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">length</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">length</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Reasons</span><span class="o">.</span><span class="n">NO_STATUS</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">elif</span> <span class="n">length</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Reasons</span><span class="o">.</span><span class="n">PROTOCOL_ERROR</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="s1">&#39;invalid close code length&#39;</span>
+
+        <span class="n">code</span> <span class="o">=</span> <span class="n">data</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">code</span> <span class="o">&lt;</span> <span class="n">Reasons</span><span class="o">.</span><span class="n">NORMAL</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">code</span> <span class="ow">or</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">INVALID_CODES</span> <span class="ow">or</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">UNDEFINED_CODES</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Client sent invalid close code.&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">Reasons</span><span class="o">.</span><span class="n">PROTOCOL_ERROR</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="s1">&#39;invalid close code&#39;</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">reason</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">Reason</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">code</span><span class="p">),</span> <span class="n">reason</span>
+        <span class="k">except</span> <span class="ne">UnicodeDecodeError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Reasons</span><span class="o">.</span><span class="n">PROTOCOL_ERROR</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="s2">&quot;invalid utf8 in close reason&quot;</span></div>
+
+
+<div class="viewcode-block" id="Reasons"><a class="viewcode-back" href="../../modules/reason.html#websocket.reasons.Reasons">[docs]</a><span class="k">class</span> <span class="nc">Reasons</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Enum with most defined reasons with their codes.&quot;&quot;&quot;</span>
+
+    <span class="n">NORMAL</span> <span class="o">=</span> <span class="n">Reason</span><span class="p">((</span><span class="mi">1000</span><span class="p">)</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;big&#39;</span><span class="p">))</span>
+    <span class="sd">&quot;&quot;&quot;indicates a normal closure, meaning that the purpose for which the connection was</span>
+<span class="sd">    established has been fulfilled.&quot;&quot;&quot;</span>
+
+    <span class="n">GOING_AWAY</span> <span class="o">=</span> <span class="n">Reason</span><span class="p">((</span><span class="mi">1001</span><span class="p">)</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;big&#39;</span><span class="p">))</span>
+    <span class="sd">&quot;&quot;&quot;indicates that an endpoint is &quot;going away&quot;, such as a server going down or a browser</span>
+<span class="sd">    having navigated away from a page.&quot;&quot;&quot;</span>
+
+    <span class="n">PROTOCOL_ERROR</span> <span class="o">=</span> <span class="n">Reason</span><span class="p">((</span><span class="mi">1002</span><span class="p">)</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;big&#39;</span><span class="p">))</span>
+    <span class="sd">&quot;&quot;&quot;indicates that an endpoint is terminating the connection due to a protocol error.&quot;&quot;&quot;</span>
+
+    <span class="n">UNACCEPTABLE_DATA</span> <span class="o">=</span> <span class="n">Reason</span><span class="p">((</span><span class="mi">1003</span><span class="p">)</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;big&#39;</span><span class="p">))</span>
+    <span class="sd">&quot;&quot;&quot;indicates that an endpoint is terminating the connection because it has received a</span>
+<span class="sd">    type of data it cannot accept (e.g., an endpoint that understands only text data MAY</span>
+<span class="sd">    send this if it receives a binary message).&quot;&quot;&quot;</span>
+
+    <span class="n">RESERVED</span> <span class="o">=</span> <span class="n">Reason</span><span class="p">((</span><span class="mi">1004</span><span class="p">)</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;big&#39;</span><span class="p">))</span>
+    <span class="sd">&quot;&quot;&quot;The specific meaning might be defined in the future.&quot;&quot;&quot;</span>
+
+    <span class="n">NO_STATUS</span> <span class="o">=</span> <span class="n">Reason</span><span class="p">((</span><span class="mi">1005</span><span class="p">)</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;big&#39;</span><span class="p">))</span>
+    <span class="sd">&quot;&quot;&quot;reserved value and MUST NOT be set as a status code in a Close control frame by an endpoint.</span>
+<span class="sd">    It is designated for use in applications expecting a status code to indicate that no status</span>
+<span class="sd">    code was actually present.&quot;&quot;&quot;</span>
+
+    <span class="n">ABNORMAL_CLOSE</span> <span class="o">=</span> <span class="n">Reason</span><span class="p">((</span><span class="mi">1006</span><span class="p">)</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;big&#39;</span><span class="p">))</span>
+    <span class="sd">&quot;&quot;&quot;reserved value and MUST NOT be set as a status code in a Close control frame by an</span>
+<span class="sd">    endpoint. It is designated for use in applications expecting a status code to indicate</span>
+<span class="sd">    that the connection was closed abnormally, e.g., without sending or receiving a Close</span>
+<span class="sd">    control frame.&quot;&quot;&quot;</span>
+
+    <span class="n">INCONSISTENT_DATA</span> <span class="o">=</span> <span class="n">Reason</span><span class="p">((</span><span class="mi">1007</span><span class="p">)</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;big&#39;</span><span class="p">))</span>
+    <span class="sd">&quot;&quot;&quot;indicates that an endpoint is terminating the connection because it has received data</span>
+<span class="sd">    within a message that was not consistent with the type of the message (e.g.,</span>
+<span class="sd">    non-UTF-8 [RFC3629] data within a text message).&quot;&quot;&quot;</span>
+
+    <span class="n">POLICY_VIOLATION</span> <span class="o">=</span> <span class="n">Reason</span><span class="p">((</span><span class="mi">1008</span><span class="p">)</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;big&#39;</span><span class="p">))</span>
+    <span class="sd">&quot;&quot;&quot;indicates that an endpoint is terminating the connection because it has received a</span>
+<span class="sd">    message that violates its policy.  This is a generic status code that can be returned</span>
+<span class="sd">    when there is no other more suitable status code (e.g., 1003 or 1009) or if there is a</span>
+<span class="sd">    need to hide specific details about the policy.&quot;&quot;&quot;</span>
+
+    <span class="n">MESSAGE_TOO_BIG</span> <span class="o">=</span> <span class="n">Reason</span><span class="p">((</span><span class="mi">1009</span><span class="p">)</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;big&#39;</span><span class="p">))</span>
+    <span class="sd">&quot;&quot;&quot;indicates that an endpoint is terminating the connection because it has received a</span>
+<span class="sd">    message that is too big for it to process.&quot;&quot;&quot;</span>
+
+    <span class="n">EXTENSION_NOT_PRESENT</span> <span class="o">=</span> <span class="n">Reason</span><span class="p">((</span><span class="mi">1010</span><span class="p">)</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;big&#39;</span><span class="p">))</span>
+    <span class="sd">&quot;&quot;&quot;indicates that an endpoint (client) is terminating the connection because it has</span>
+<span class="sd">    expected the server to negotiate one or more extension, but the server didn&#39;t</span>
+<span class="sd">    return them in the response message of the WebSocket handshake.  The list of</span>
+<span class="sd">    extensions that are needed SHOULD appear in the /reason/ part of the Close frame.</span>
+<span class="sd">    Note that this status code is not used by the server, because it can fail the</span>
+<span class="sd">    WebSocket handshake instead.&quot;&quot;&quot;</span>
+
+    <span class="n">UNEXPECTED_CONDITION</span> <span class="o">=</span> <span class="n">Reason</span><span class="p">((</span><span class="mi">1011</span><span class="p">)</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;big&#39;</span><span class="p">))</span>
+    <span class="sd">&quot;&quot;&quot;indicates that a server is terminating the connection because it encountered an</span>
+<span class="sd">    unexpected condition that prevented it from fulfilling the request.&quot;&quot;&quot;</span>
+
+    <span class="n">TLS_HANDSHAKE_FAILURE</span> <span class="o">=</span> <span class="n">Reason</span><span class="p">((</span><span class="mi">1015</span><span class="p">)</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;big&#39;</span><span class="p">))</span>
+    <span class="sd">&quot;&quot;&quot;reserved value and MUST NOT be set as a status code in a Close control frame by an</span>
+<span class="sd">    endpoint.  It is designated for use in applications expecting a status code to</span>
+<span class="sd">    indicate that the connection was closed due to a failure to perform a TLS</span>
+<span class="sd">    handshake (e.g., the server certificate can&#39;t be verified).</span>
+<span class="sd">    &quot;&quot;&quot;</span></div>
+
+
+<span class="k">for</span> <span class="n">reason</span> <span class="ow">in</span> <span class="n">Reasons</span><span class="p">:</span>
+    <span class="n">reason</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">set_description</span><span class="p">(</span><span class="n">reason</span><span class="o">.</span><span class="vm">__doc__</span><span class="p">)</span>
+
+<span class="n">INVALID_CODES</span> <span class="o">=</span> <span class="p">[</span><span class="n">reason</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">code</span> <span class="k">for</span> <span class="n">reason</span> <span class="ow">in</span> <span class="p">[</span>
+    <span class="n">Reasons</span><span class="o">.</span><span class="n">RESERVED</span><span class="p">,</span>
+    <span class="n">Reasons</span><span class="o">.</span><span class="n">NO_STATUS</span><span class="p">,</span>
+    <span class="n">Reasons</span><span class="o">.</span><span class="n">ABNORMAL_CLOSE</span><span class="p">,</span>
+    <span class="n">Reasons</span><span class="o">.</span><span class="n">TLS_HANDSHAKE_FAILURE</span>
+<span class="p">]]</span>
+
+<span class="n">UNDEFINED_CODES</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">UNDEFINED_CODES</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">code</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;big&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">code</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1012</span><span class="p">,</span> <span class="mi">1015</span><span class="p">))</span>
+<span class="n">UNDEFINED_CODES</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">code</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;big&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">code</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1016</span><span class="p">,</span> <span class="mi">3000</span><span class="p">))</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Erlend Tobiassen.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

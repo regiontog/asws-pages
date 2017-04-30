@@ -1,0 +1,350 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>websocket.client &#8212; asws 1.0.0a documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.0.0a',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for websocket.client</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">You should not make an instance of the Client class yourself, rather you should listen for new connections with </span>
+<span class="sd">:meth:`~websocket.server.WebsocketServer.connection`</span>
+
+<span class="sd">&gt;&gt;&gt; @socket.connection</span>
+<span class="sd">&gt;&gt;&gt; async def on_connection(client: Client):</span>
+<span class="sd">...     # Here you can use the client, register callbacks on it or send it messages</span>
+<span class="sd">...     await client.writer.ping()</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">asyncio</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">from</span> <span class="nn">.enums</span> <span class="k">import</span> <span class="n">DataType</span><span class="p">,</span> <span class="n">State</span>
+<span class="kn">from</span> <span class="nn">.reasons</span> <span class="k">import</span> <span class="n">Reasons</span><span class="p">,</span> <span class="n">Reason</span>
+<span class="kn">from</span> <span class="nn">.stream.reader</span> <span class="k">import</span> <span class="n">WebSocketReader</span>
+<span class="kn">from</span> <span class="nn">.stream.writer</span> <span class="k">import</span> <span class="n">WebSocketWriter</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="Client"><a class="viewcode-back" href="../../modules/client.html#websocket.client.Client">[docs]</a><span class="k">class</span> <span class="nc">Client</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :ivar addr: IPv4 or IPv6 address of the client.</span>
+<span class="sd">    :type addr: str</span>
+<span class="sd">    :ivar port: The port the client opened it&#39;s socket on.</span>
+<span class="sd">    :type port: int</span>
+<span class="sd">    :ivar writer: The writer used for writing frames to the client.</span>
+<span class="sd">    :type writer: WebSocketWriter</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">addr</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">writer</span><span class="p">,</span> <span class="n">loop</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">state</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addr</span> <span class="o">=</span> <span class="n">addr</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">port</span> <span class="o">=</span> <span class="n">port</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_type</span> <span class="o">=</span> <span class="n">DataType</span><span class="o">.</span><span class="n">NONE</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">writer</span> <span class="o">=</span> <span class="n">WebSocketWriter</span><span class="p">(</span><span class="n">writer</span><span class="p">,</span> <span class="n">loop</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_reader</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">read_task</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">continuation</span> <span class="o">=</span> <span class="n">DataType</span><span class="o">.</span><span class="n">NONE</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server_has_initiated_close</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_loop</span> <span class="o">=</span> <span class="n">loop</span>
+
+        <span class="nd">@self</span><span class="o">.</span><span class="n">message</span>
+        <span class="k">async</span> <span class="k">def</span> <span class="nf">on_message</span><span class="p">(</span><span class="n">reader</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No message callback defined.&quot;</span><span class="p">)</span>
+
+        <span class="nd">@self</span><span class="o">.</span><span class="n">ping</span>
+        <span class="k">async</span> <span class="k">def</span> <span class="nf">on_ping</span><span class="p">(</span><span class="n">payload</span><span class="p">,</span> <span class="n">length</span><span class="p">):</span>
+            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">pong</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="n">payload</span><span class="p">)</span>
+
+        <span class="nd">@self</span><span class="o">.</span><span class="n">pong</span>
+        <span class="k">async</span> <span class="k">def</span> <span class="nf">on_pong</span><span class="p">(</span><span class="n">payload</span><span class="p">,</span> <span class="n">length</span><span class="p">):</span>
+            <span class="k">pass</span>
+
+        <span class="nd">@self</span><span class="o">.</span><span class="n">closed</span>
+        <span class="k">async</span> <span class="k">def</span> <span class="nf">on_closed</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">reason</span><span class="p">):</span>
+            <span class="k">pass</span>
+
+<div class="viewcode-block" id="Client.message"><a class="viewcode-back" href="../../modules/client.html#websocket.client.Client.message">[docs]</a>    <span class="k">def</span> <span class="nf">message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Decorator for registering the on_message callback.</span>
+<span class="sd">        </span>
+<span class="sd">        :param fn: The callback to register.</span>
+<span class="sd">        </span>
+<span class="sd">        The callback should be async and take one parameter, a :class:`~websocket.stream.reader.WebSocketReader`</span>
+<span class="sd">        </span>
+<span class="sd">        This callback is called when the server receives an valid data frame, </span>
+<span class="sd">        if an exception occurs after the first valid frame e.g. if an text frame </span>
+<span class="sd">        contains invalid utf-8, or if it&#39;s an invalid fragmented message, then we </span>
+<span class="sd">        send the exception to the reader with :meth:`~asyncio.StreamReader.set_exception`.</span>
+<span class="sd">        </span>
+<span class="sd">        &gt;&gt;&gt; @client.message</span>
+<span class="sd">        &gt;&gt;&gt; async def on_message(reader: WebSocketReader):</span>
+<span class="sd">        ...     print(&quot;Got message &quot; + await reader.get())</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">on_message</span> <span class="o">=</span> <span class="n">fn</span></div>
+
+<div class="viewcode-block" id="Client.ping"><a class="viewcode-back" href="../../modules/client.html#websocket.client.Client.ping">[docs]</a>    <span class="k">def</span> <span class="nf">ping</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Decorator for registering the on_ping callback.</span>
+<span class="sd">        </span>
+<span class="sd">        :param fn: The callback to register.</span>
+<span class="sd">        </span>
+<span class="sd">        If you set this callback you will override the default behaviour of sending pongs back to the client when </span>
+<span class="sd">        receiving pings. If you want to keep this behaviour call :meth:`~websocket.stream.writer.WebSocketWriter.pong`.</span>
+<span class="sd">        </span>
+<span class="sd">        The callback should be async and take two parameters, :class:`bytes` payload, and :class:`int` length.</span>
+<span class="sd">        This callback is called when we receive a valid ping from the client.</span>
+<span class="sd">        </span>
+<span class="sd">        &gt;&gt;&gt; @client.ping</span>
+<span class="sd">        &gt;&gt;&gt; async def on_ping(payload: bytes, length: int):</span>
+<span class="sd">        ...     print(&quot;Received ping from client&quot;)</span>
+<span class="sd">        ...     await self.writer.pong(length, payload)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">on_ping</span> <span class="o">=</span> <span class="n">fn</span></div>
+
+<div class="viewcode-block" id="Client.pong"><a class="viewcode-back" href="../../modules/client.html#websocket.client.Client.pong">[docs]</a>    <span class="k">def</span> <span class="nf">pong</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Decorator for registering the on_pong callback.</span>
+<span class="sd">        </span>
+<span class="sd">        :param fn: The callback to register.</span>
+<span class="sd">        </span>
+<span class="sd">        The callback should be async and take two parameters, :class:`bytes` payload, and :class:`int` length</span>
+<span class="sd">        This callback is called when we receive a valid pong from the client.</span>
+
+<span class="sd">        &gt;&gt;&gt; @client.pong</span>
+<span class="sd">        &gt;&gt;&gt; async def on_pong(payload: bytes, length: int):</span>
+<span class="sd">        ...     print(&quot;Received pong from client&quot;)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">on_pong</span> <span class="o">=</span> <span class="n">fn</span></div>
+
+<div class="viewcode-block" id="Client.closed"><a class="viewcode-back" href="../../modules/client.html#websocket.client.Client.closed">[docs]</a>    <span class="k">def</span> <span class="nf">closed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fn</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Decorator for registering the on_closed callback.</span>
+<span class="sd">        </span>
+<span class="sd">        :param fn: The callback to register.</span>
+<span class="sd">        </span>
+<span class="sd">        The callback should be async and take two parameters, :class:`bytes` code of length 2, and :class:`str` reason.</span>
+<span class="sd">        This callback is called when the connection this this client is closing.</span>
+
+<span class="sd">        &gt;&gt;&gt; @client.closed</span>
+<span class="sd">        &gt;&gt;&gt; async def on_closed(code: bytes, reason: str):</span>
+<span class="sd">        ...     print(&quot;Connection with client is closing for &quot; + reason)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">on_closed</span> <span class="o">=</span> <span class="n">fn</span></div>
+
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">close_with_read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reader</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="n">reason</span><span class="p">):</span>
+        <span class="n">close</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">ensure_future</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">reason</span><span class="p">),</span> <span class="n">loop</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_loop</span><span class="p">)</span>
+        <span class="n">buffer</span> <span class="o">=</span> <span class="n">WebSocketReader</span><span class="p">(</span><span class="n">DataType</span><span class="o">.</span><span class="n">BINARY</span><span class="p">)</span>
+        <span class="n">length</span> <span class="o">=</span> <span class="k">await</span> <span class="n">buffer</span><span class="o">.</span><span class="n">feed</span><span class="p">(</span><span class="n">reader</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="k">await</span> <span class="n">buffer</span><span class="o">.</span><span class="n">readexactly</span><span class="p">(</span><span class="n">length</span><span class="p">)</span>
+        <span class="k">await</span> <span class="n">close</span>
+        <span class="k">return</span> <span class="n">data</span>
+
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">reason</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">server_has_initiated_close</span><span class="p">:</span>
+            <span class="n">asyncio</span><span class="o">.</span><span class="n">ensure_future</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_closed</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">reason</span><span class="p">),</span> <span class="n">loop</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_loop</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">server_has_initiated_close</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">reason</span><span class="p">)</span>
+
+            <span class="c1"># TODO: Kill in 5 secs if client dont respond</span>
+
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">_read_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reader</span><span class="p">,</span> <span class="n">fin</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reader</span><span class="o">.</span><span class="n">feed</span><span class="p">(</span><span class="n">reader</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">fin</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">continuation</span> <span class="o">=</span> <span class="n">DataType</span><span class="o">.</span><span class="n">NONE</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_reader</span><span class="o">.</span><span class="n">decoder</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_reader</span><span class="o">.</span><span class="n">feed_eof</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">continuation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_reader</span><span class="o">.</span><span class="n">data_type</span>
+        <span class="k">except</span> <span class="ne">UnicodeDecodeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_reader</span><span class="o">.</span><span class="n">set_exception</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">Reasons</span><span class="o">.</span><span class="n">INCONSISTENT_DATA</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                             <span class="n">f</span><span class="s2">&quot;</span><span class="si">{e.object[e.start:e.end]}</span><span class="s2"> at </span><span class="si">{e.start}</span><span class="s2">-</span><span class="si">{e.end}</span><span class="s2">: </span><span class="si">{e.reason}</span><span class="s2">&quot;</span><span class="p">[:</span><span class="n">WebSocketWriter</span><span class="o">.</span><span class="n">MAX_LEN_7</span><span class="p">])</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">handle_data</span><span class="p">(</span><span class="n">kind</span><span class="p">):</span>
+        <span class="k">async</span> <span class="k">def</span> <span class="nf">handler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reader</span><span class="p">,</span> <span class="n">fin</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">continuation</span> <span class="o">!=</span> <span class="n">DataType</span><span class="o">.</span><span class="n">NONE</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_reader</span><span class="o">.</span><span class="n">set_exception</span><span class="p">(</span><span class="ne">Exception</span><span class="p">(</span>
+                    <span class="n">f</span><span class="s2">&quot;Received unexpected {kind.name.lower()} data frame from client {self.addr, self.port}, &quot;</span>
+                    <span class="n">f</span><span class="s2">&quot;expected continuation.&quot;</span><span class="p">))</span>
+
+                <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">close_with_read</span><span class="p">(</span><span class="n">reader</span><span class="p">,</span> <span class="n">Reasons</span><span class="o">.</span><span class="n">PROTOCOL_ERROR</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="s2">&quot;expected continuation frame&quot;</span><span class="p">)</span>
+                <span class="k">return</span>
+
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Received {kind.name.lower()} data frame from client {self.addr, self.port}.&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="n">kind</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_reader</span> <span class="o">=</span> <span class="n">WebSocketReader</span><span class="p">(</span><span class="n">kind</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_loop</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_message</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_reader</span><span class="p">))</span>
+
+            <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_message</span><span class="p">(</span><span class="n">reader</span><span class="p">,</span> <span class="n">fin</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">handler</span>
+
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">handle_continuation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reader</span><span class="p">,</span> <span class="n">fin</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">continuation</span> <span class="o">==</span> <span class="n">DataType</span><span class="o">.</span><span class="n">NONE</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Received unexpected continuation data frame from client &quot;</span>
+                         <span class="n">f</span><span class="s2">&quot;{self.addr, self.port}, expected {self.continuation.name.lower()}.&quot;</span><span class="p">)</span>
+
+            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">close_with_read</span><span class="p">(</span><span class="n">reader</span><span class="p">,</span> <span class="n">Reasons</span><span class="o">.</span><span class="n">PROTOCOL_ERROR</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                                       <span class="n">f</span><span class="s2">&quot;expected {self.continuation.name.lower()} frame&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Received continuation frame from client {self.addr, self.port}.&quot;</span><span class="p">)</span>
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_message</span><span class="p">(</span><span class="n">reader</span><span class="p">,</span> <span class="n">fin</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">ensure_clean_close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">continuation</span> <span class="o">!=</span> <span class="n">DataType</span><span class="o">.</span><span class="n">NONE</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_reader</span><span class="o">.</span><span class="n">set_exception</span><span class="p">(</span><span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Closing connection in middle of message.&quot;</span><span class="p">))</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">handle_ping_or_pong</span><span class="p">(</span><span class="n">kind</span><span class="p">):</span>
+        <span class="k">async</span> <span class="k">def</span> <span class="nf">handler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reader</span><span class="p">,</span> <span class="n">fin</span><span class="p">):</span>
+            <span class="n">buffer</span> <span class="o">=</span> <span class="n">WebSocketReader</span><span class="p">(</span><span class="n">DataType</span><span class="o">.</span><span class="n">BINARY</span><span class="p">)</span>
+            <span class="n">feed</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">ensure_future</span><span class="p">(</span><span class="n">buffer</span><span class="o">.</span><span class="n">feed</span><span class="p">(</span><span class="n">reader</span><span class="p">),</span> <span class="n">loop</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_loop</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">fin</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">server_has_initiated_close</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">fin</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Received fragmented {kind.name.lower()} from client {self.addr, self.port}.&quot;</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">ensure_clean_close</span><span class="p">()</span>
+                    <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">Reasons</span><span class="o">.</span><span class="n">PROTOCOL_ERROR</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="s2">&quot;fragmented control frame&quot;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Received {kind.name.lower()} from client {self.addr, self.port} after server &quot;</span>
+                                   <span class="s2">&quot;initiated close.&quot;</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">ensure_clean_close</span><span class="p">()</span>
+                    <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">Reasons</span><span class="o">.</span><span class="n">POLICY_VIOLATION</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="s2">&quot;control frame after close&quot;</span><span class="p">)</span>
+
+                <span class="k">await</span> <span class="n">feed</span>
+                <span class="k">return</span>
+
+            <span class="n">length</span> <span class="o">=</span> <span class="k">await</span> <span class="n">feed</span>
+            <span class="k">if</span> <span class="n">length</span> <span class="o">&gt;</span> <span class="mi">125</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;{kind.name.lower()} payload too long(</span><span class="si">{length}</span><span class="s2"> bytes).&quot;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ensure_clean_close</span><span class="p">()</span>
+                <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">Reasons</span><span class="o">.</span><span class="n">PROTOCOL_ERROR</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="s2">&quot;control frame too long&quot;</span><span class="p">)</span>
+                <span class="k">return</span>
+
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Received {kind.name.lower()} from client {self.addr, self.port}.&quot;</span><span class="p">)</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="k">await</span> <span class="n">buffer</span><span class="o">.</span><span class="n">readexactly</span><span class="p">(</span><span class="n">length</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">kind</span> <span class="ow">is</span> <span class="n">DataType</span><span class="o">.</span><span class="n">PING</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_loop</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_ping</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">length</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="n">kind</span> <span class="ow">is</span> <span class="n">DataType</span><span class="o">.</span><span class="n">PONG</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_loop</span><span class="o">.</span><span class="n">create_task</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">on_pong</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">length</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">handler</span>
+
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">handle_close</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reader</span><span class="p">,</span> <span class="n">fin</span><span class="p">):</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Received close from client {self.addr, self.port}.&quot;</span><span class="p">)</span>
+
+        <span class="n">buffer</span> <span class="o">=</span> <span class="n">WebSocketReader</span><span class="p">(</span><span class="n">DataType</span><span class="o">.</span><span class="n">BINARY</span><span class="p">)</span>
+        <span class="n">length</span> <span class="o">=</span> <span class="k">await</span> <span class="n">buffer</span><span class="o">.</span><span class="n">feed</span><span class="p">(</span><span class="n">reader</span><span class="p">)</span>
+        <span class="n">reason</span> <span class="o">=</span> <span class="k">await</span> <span class="n">buffer</span><span class="o">.</span><span class="n">readexactly</span><span class="p">(</span><span class="n">length</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">server_has_initiated_close</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">length</span> <span class="o">&gt;</span> <span class="n">WebSocketWriter</span><span class="o">.</span><span class="n">MAX_LEN_7</span><span class="p">:</span>
+                <span class="n">code</span><span class="p">,</span> <span class="n">reason</span> <span class="o">=</span> <span class="n">Reasons</span><span class="o">.</span><span class="n">PROTOCOL_ERROR</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="s2">&quot;control frame too long&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">code</span><span class="p">,</span> <span class="n">reason</span> <span class="o">=</span> <span class="n">Reason</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">reason</span><span class="p">,</span> <span class="n">length</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="n">Reasons</span><span class="o">.</span><span class="n">NO_STATUS</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+                    <span class="n">code</span> <span class="o">=</span> <span class="n">Reasons</span><span class="o">.</span><span class="n">NORMAL</span><span class="o">.</span><span class="n">value</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">ensure_clean_close</span><span class="p">()</span>
+            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">reason</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">State</span><span class="o">.</span><span class="n">CLOSING</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_task</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">read_task</span><span class="o">.</span><span class="n">cancel</span><span class="p">()</span>
+
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">handle_undefined</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reader</span><span class="p">,</span> <span class="n">fin</span><span class="p">):</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Received invalid opcode from client {self.addr, self.port}.&quot;</span><span class="p">)</span>
+
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">close_with_read</span><span class="p">(</span><span class="n">reader</span><span class="p">,</span> <span class="n">Reasons</span><span class="o">.</span><span class="n">PROTOCOL_ERROR</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="s2">&quot;invalid opcode&quot;</span><span class="p">)</span></div>
+
+
+<span class="n">HANDLERS</span> <span class="o">=</span> <span class="p">{</span><span class="n">opcode</span><span class="p">:</span> <span class="n">Client</span><span class="o">.</span><span class="n">handle_undefined</span> <span class="k">for</span> <span class="n">opcode</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">4</span><span class="p">)}</span>
+<span class="n">HANDLERS</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+    <span class="n">DataType</span><span class="o">.</span><span class="n">CONTINUATION</span><span class="o">.</span><span class="n">value</span><span class="p">:</span> <span class="n">Client</span><span class="o">.</span><span class="n">handle_continuation</span><span class="p">,</span>
+    <span class="n">DataType</span><span class="o">.</span><span class="n">TEXT</span><span class="o">.</span><span class="n">value</span><span class="p">:</span> <span class="n">Client</span><span class="o">.</span><span class="n">handle_data</span><span class="p">(</span><span class="n">DataType</span><span class="o">.</span><span class="n">TEXT</span><span class="p">),</span>
+    <span class="n">DataType</span><span class="o">.</span><span class="n">BINARY</span><span class="o">.</span><span class="n">value</span><span class="p">:</span> <span class="n">Client</span><span class="o">.</span><span class="n">handle_data</span><span class="p">(</span><span class="n">DataType</span><span class="o">.</span><span class="n">BINARY</span><span class="p">),</span>
+    <span class="n">DataType</span><span class="o">.</span><span class="n">CLOSE</span><span class="o">.</span><span class="n">value</span><span class="p">:</span> <span class="n">Client</span><span class="o">.</span><span class="n">handle_close</span><span class="p">,</span>
+    <span class="n">DataType</span><span class="o">.</span><span class="n">PING</span><span class="o">.</span><span class="n">value</span><span class="p">:</span> <span class="n">Client</span><span class="o">.</span><span class="n">handle_ping_or_pong</span><span class="p">(</span><span class="n">DataType</span><span class="o">.</span><span class="n">PING</span><span class="p">),</span>
+    <span class="n">DataType</span><span class="o">.</span><span class="n">PONG</span><span class="o">.</span><span class="n">value</span><span class="p">:</span> <span class="n">Client</span><span class="o">.</span><span class="n">handle_ping_or_pong</span><span class="p">(</span><span class="n">DataType</span><span class="o">.</span><span class="n">PONG</span><span class="p">),</span>
+<span class="p">})</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Erlend Tobiassen.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
