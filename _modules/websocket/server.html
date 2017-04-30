@@ -42,10 +42,11 @@
           <div class="body" role="main">
             
   <h1>Source code for websocket.server</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Usage:</span>
+<span></span><span class="sd">&quot;&quot;&quot;Usage</span>
+
 <span class="sd">&gt;&gt;&gt; loop = asyncio.get_event_loop()</span>
 <span class="sd">&gt;&gt;&gt; socket = WebSocketServer(&quot;localhost&quot;, 3001, loop=loop)</span>
-<span class="sd">&gt;&gt;&gt;</span>
+<span class="sd">...</span>
 <span class="sd">&gt;&gt;&gt; @socket.connection</span>
 <span class="sd">&gt;&gt;&gt; async def on_connection(client: Client):</span>
 <span class="sd">...     logger.info(f&#39;Connection from {client.addr, client.port}&#39;)</span>
@@ -54,11 +55,11 @@
 <span class="sd">...     @client.message</span>
 <span class="sd">...     async def on_message(reader: WebSocketReader):</span>
 <span class="sd">...         await client.writer.send(await reader.get())</span>
-<span class="sd">&gt;&gt;&gt;</span>
+<span class="sd">...</span>
 <span class="sd">&gt;&gt;&gt; with socket as server:</span>
 <span class="sd">...     logger.info(f&#39;Serving on {server.sockets[0].getsockname()}&#39;)</span>
 <span class="sd">...     loop.run_forever()</span>
-<span class="sd">&gt;&gt;&gt;</span>
+<span class="sd">...</span>
 <span class="sd">&gt;&gt;&gt; loop.close()</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
