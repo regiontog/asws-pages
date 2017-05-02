@@ -124,57 +124,46 @@
 
         <span class="k">return</span> <span class="n">result</span></div>
 
-<div class="viewcode-block" id="Buffer.read_into_exactly"><a class="viewcode-back" href="../../../modules/buffer.html#websocket.stream.buffer.Buffer.read_into_exactly">[docs]</a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">read_into_exactly</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buffer</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+<div class="viewcode-block" id="Buffer.read_into_exactly"><a class="viewcode-back" href="../../../modules/buffer.html#websocket.stream.buffer.Buffer.read_into_exactly">[docs]</a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">read_into_exactly</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buffer</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Read data from the buffer into a bytearray. Reads n bytes or throws an exception if reading eof.</span>
+<span class="sd">        </span>
+<span class="sd">        n must not exceed the buffer limit, or else it will block forever.</span>
 
 <span class="sd">        :param buffer: The bytearray to write the data into.</span>
 <span class="sd">        :param n: The amount of data to read.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_available</span> <span class="o">&lt;</span> <span class="n">n</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">eof</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">exc</span><span class="p">:</span>
-            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">write_signal</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">exc</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">exc</span>
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wait_for_read</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">eof</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_available</span> <span class="o">&lt;</span> <span class="n">n</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">IncompleteReadError</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;</span><span class="si">{self.read_available}</span><span class="s2"> bytes available of </span><span class="si">{n}</span><span class="s2"> expected bytes&quot;</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">n</span>
-
-        <span class="n">tail</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_head</span> <span class="o">+</span> <span class="n">n</span>
-        <span class="k">if</span> <span class="n">tail</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">limit</span><span class="p">:</span>
-            <span class="n">remaining</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">limit</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_head</span>
-            <span class="n">buffer</span><span class="p">[:</span><span class="n">remaining</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">backing</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">read_head</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">limit</span><span class="p">]</span>
-            <span class="n">buffer</span><span class="p">[</span><span class="n">remaining</span><span class="p">:</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">backing</span><span class="p">[:</span><span class="n">n</span> <span class="o">-</span> <span class="n">remaining</span><span class="p">]</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">read_head</span> <span class="o">=</span> <span class="n">n</span> <span class="o">-</span> <span class="n">remaining</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">buffer</span><span class="p">[:</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">backing</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">read_head</span><span class="p">:</span><span class="n">tail</span><span class="p">]</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">read_head</span> <span class="o">=</span> <span class="n">tail</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">read_available</span> <span class="o">-=</span> <span class="n">n</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">write_available</span> <span class="o">+=</span> <span class="n">n</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">read_signal</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">read_signal</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span></div>
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_into</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="n">offset</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Buffer.read_into"><a class="viewcode-back" href="../../../modules/buffer.html#websocket.stream.buffer.Buffer.read_into">[docs]</a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">read_into</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buffer</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Read data from the buffer into a bytearray. Reads until eof or n bytes.</span>
+<span class="sd">        </span>
+<span class="sd">        n must not exceed the buffer limit, or else it will block forever.</span>
 
 <span class="sd">        :param buffer: The bytearray to write the data into.</span>
 <span class="sd">        :param n: The amount of data to read.</span>
 <span class="sd">        :param offset: The index into buffer to write to.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wait_for_read</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">eof</span><span class="p">:</span>
+            <span class="n">n</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">read_available</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_into</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="n">offset</span><span class="p">)</span></div>
+
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">_wait_for_read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
         <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_available</span> <span class="o">&lt;</span> <span class="n">n</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">eof</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">exc</span><span class="p">:</span>
             <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">write_signal</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">exc</span><span class="p">:</span>
             <span class="k">raise</span> <span class="bp">self</span><span class="o">.</span><span class="n">exc</span>
 
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">eof</span><span class="p">:</span>
-            <span class="n">n</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">read_available</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
-
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">_read_into</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buffer</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">n</span>
 
@@ -193,7 +182,7 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">read_signal</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">read_signal</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">n</span></div>
+        <span class="k">return</span> <span class="n">n</span>
 
 <div class="viewcode-block" id="Buffer.feed_eof"><a class="viewcode-back" href="../../../modules/buffer.html#websocket.stream.buffer.Buffer.feed_eof">[docs]</a>    <span class="k">def</span> <span class="nf">feed_eof</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Feed the buffer with `end of file`&quot;&quot;&quot;</span>
@@ -228,7 +217,20 @@
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper"><div class="relations">
+        <div class="sphinxsidebarwrapper">
+<h3><a href="../../../index.html">Table Of Contents</a></h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../intro.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/buffer.html">Buffer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/client.html">Client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/enums.html">Enums</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/fragment.html">Fragment Context</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/reader.html">Reader</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/reason.html">Reasons</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/server.html">Socket</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/writer.html">Writer</a></li>
+</ul>
+<div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../../../index.html">Documentation overview</a><ul>

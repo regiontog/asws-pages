@@ -132,6 +132,7 @@ callback registerd with <a class="reference internal" href="client.html#websocke
 <dt id="websocket.stream.reader.WebSocketReader.read_into">
 <code class="descname">read_into</code><span class="sig-paren">(</span><em>buffer</em>, <em>n</em>, <em>offset=0</em><span class="sig-paren">)</span><a class="headerlink" href="#websocket.stream.reader.WebSocketReader.read_into" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read data from the buffer into a bytearray. Reads until eof or n bytes.</p>
+<p>n must not exceed the buffer limit, or else it will block forever.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -149,8 +150,9 @@ callback registerd with <a class="reference internal" href="client.html#websocke
 
 <dl class="method">
 <dt id="websocket.stream.reader.WebSocketReader.read_into_exactly">
-<code class="descname">read_into_exactly</code><span class="sig-paren">(</span><em>buffer</em>, <em>n</em><span class="sig-paren">)</span><a class="headerlink" href="#websocket.stream.reader.WebSocketReader.read_into_exactly" title="Permalink to this definition">¶</a></dt>
+<code class="descname">read_into_exactly</code><span class="sig-paren">(</span><em>buffer</em>, <em>n</em>, <em>offset=0</em><span class="sig-paren">)</span><a class="headerlink" href="#websocket.stream.reader.WebSocketReader.read_into_exactly" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read data from the buffer into a bytearray. Reads n bytes or throws an exception if reading eof.</p>
+<p>n must not exceed the buffer limit, or else it will block forever.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -194,7 +196,20 @@ callback registerd with <a class="reference internal" href="client.html#websocke
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper"><div class="relations">
+        <div class="sphinxsidebarwrapper">
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="buffer.html">Buffer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="enums.html">Enums</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fragment.html">Fragment Context</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Reader</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reason.html">Reasons</a></li>
+<li class="toctree-l1"><a class="reference internal" href="server.html">Socket</a></li>
+<li class="toctree-l1"><a class="reference internal" href="writer.html">Writer</a></li>
+</ul>
+<div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>

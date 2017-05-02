@@ -1,0 +1,193 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Getting Started &#8212; asws 1.0.0a documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.0.0a',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Writer" href="modules/writer.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="getting-started">
+<h1>Getting Started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="asyncio">
+<h2>Asyncio<a class="headerlink" href="#asyncio" title="Permalink to this headline">¶</a></h2>
+<p>Before trying this library you should understand the basics of python asyncio. You can
+read up on python 3 async basics <a class="reference external" href="https://snarky.ca/how-the-heck-does-async-await-work-in-python-3-5/">here</a>.</p>
+</div>
+<div class="section" id="creating-the-socket-and-server-object">
+<h2>Creating the socket and server object<a class="headerlink" href="#creating-the-socket-and-server-object" title="Permalink to this headline">¶</a></h2>
+<p>Before we can do anything you need to create the websocket object, we also create the eventloop.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">loop</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">get_event_loop</span><span class="p">()</span>
+<span class="n">socket</span> <span class="o">=</span> <span class="n">WebSocketServer</span><span class="p">(</span><span class="n">address</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">loop</span><span class="o">=</span><span class="n">loop</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="registering-the-on-connection-callback">
+<h2>Registering the on_connection callback<a class="headerlink" href="#registering-the-on-connection-callback" title="Permalink to this headline">¶</a></h2>
+<p>We can listen for new websocket connections with the <a class="reference internal" href="modules/server.html#websocket.server.WebSocketServer.connection" title="websocket.server.WebSocketServer.connection"><code class="xref py py-meth docutils literal"><span class="pre">connection()</span></code></a>
+<a class="reference external" href="https://realpython.com/blog/python/primer-on-python-decorators/">decorator</a>.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="nd">@socket</span><span class="o">.</span><span class="n">connection</span>
+<span class="k">async</span> <span class="k">def</span> <span class="nf">on_connection</span><span class="p">(</span><span class="n">client</span><span class="p">:</span> <span class="n">Client</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;We just got a new connection!&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The parameter to the callback is the <a class="reference internal" href="modules/client.html#websocket.client.Client" title="websocket.client.Client"><code class="xref py py-class docutils literal"><span class="pre">Client</span></code></a> class, more about that class later.</p>
+</div>
+<div class="section" id="starting-the-server">
+<h2>Starting the server<a class="headerlink" href="#starting-the-server" title="Permalink to this headline">¶</a></h2>
+<p>Before the server will accept connections we have to start it. Starting the server is as simple as using the
+socket object as a <a class="reference external" href="http://book.pythontips.com/en/latest/context_managers.html">context manager</a>. The server
+object yielded by the context manager is a <a class="reference external" href="https://docs.python.org/3.6/library/asyncio-eventloop.html#asyncio.Server" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">Server</span></code></a> class.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">socket</span> <span class="k">as</span> <span class="n">server</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Serving on {server.sockets[0].getsockname()}&#39;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The server closed&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The server closes as soon as the with block is done. In order to keep the server alive we need to give up control to the event loop.
+We can do this with the <a class="reference external" href="https://docs.python.org/3.6/library/asyncio-eventloop.html#asyncio.AbstractEventLoop.run_forever" title="(in Python v3.6)"><code class="xref py py-meth docutils literal"><span class="pre">run_forever()</span></code></a> method.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">socket</span> <span class="k">as</span> <span class="n">server</span><span class="p">:</span>
+    <span class="n">loop</span><span class="o">.</span><span class="n">run_forever</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The server is going to close!&quot;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The server closed&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="the-client-object">
+<h2>The client object<a class="headerlink" href="#the-client-object" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="registering-the-on-message-callback">
+<h2>Registering the on_message callback<a class="headerlink" href="#registering-the-on-message-callback" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="reading-from-the-stream">
+<h2>Reading from the stream<a class="headerlink" href="#reading-from-the-stream" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="sending-messages-to-the-client">
+<h2>Sending messages to the client<a class="headerlink" href="#sending-messages-to-the-client" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="data-frame">
+<h3>Data frame<a class="headerlink" href="#data-frame" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="fragments">
+<h3>Fragments<a class="headerlink" href="#fragments" title="Permalink to this headline">¶</a></h3>
+</div>
+</div>
+<div class="section" id="other-callbacks">
+<h2>Other callbacks<a class="headerlink" href="#other-callbacks" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h3><a href="index.html">Table Of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="modules/buffer.html">Buffer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules/client.html">Client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules/enums.html">Enums</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules/fragment.html">Fragment Context</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules/reader.html">Reader</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules/reason.html">Reasons</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules/server.html">Socket</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules/writer.html">Writer</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Getting Started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#asyncio">Asyncio</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#creating-the-socket-and-server-object">Creating the socket and server object</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#registering-the-on-connection-callback">Registering the on_connection callback</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#starting-the-server">Starting the server</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#the-client-object">The client object</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#registering-the-on-message-callback">Registering the on_message callback</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#reading-from-the-stream">Reading from the stream</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sending-messages-to-the-client">Sending messages to the client</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#data-frame">Data frame</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fragments">Fragments</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#other-callbacks">Other callbacks</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="modules/writer.html" title="previous chapter">Writer</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/gettingstarted.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Erlend Tobiassen.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/gettingstarted.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

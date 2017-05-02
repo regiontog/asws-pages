@@ -3468,7 +3468,7 @@ jQuery.extend( {
 							// Map tuples (progress, done, fail) to arguments (done, fail, progress)
 							var fn = jQuery.isFunction( fns[ tuple[ 4 ] ] ) && fns[ tuple[ 4 ] ];
 
-							// deferred.progress(function() { bind to newDefer or newDefer.notify })
+							// deferred.progress(function() { bind to newDefer or newDefer.notify_of })
 							// deferred.done(function() { bind to newDefer or newDefer.resolve })
 							// deferred.fail(function() { bind to newDefer or newDefer.reject })
 							deferred[ tuple[ 1 ] ]( function() {
@@ -3529,7 +3529,7 @@ jQuery.extend( {
 									// Handle a returned thenable
 									if ( jQuery.isFunction( then ) ) {
 
-										// Special processors (notify) just wait for resolution
+										// Special processors (notify_of) just wait for resolution
 										if ( special ) {
 											then.call(
 												returned,
@@ -3696,7 +3696,7 @@ jQuery.extend( {
 			// rejected_handlers.fire
 			list.add( tuple[ 3 ].fire );
 
-			// deferred.notify = function() { deferred.notifyWith(...) }
+			// deferred.notify_of = function() { deferred.notifyWith(...) }
 			// deferred.resolve = function() { deferred.resolveWith(...) }
 			// deferred.reject = function() { deferred.rejectWith(...) }
 			deferred[ tuple[ 0 ] ] = function() {

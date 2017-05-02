@@ -54,12 +54,33 @@
 <span class="kn">import</span> <span class="nn">asyncio</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 
+<span class="kn">import</span> <span class="nn">time</span>
+
 <span class="kn">from</span> <span class="nn">.enums</span> <span class="k">import</span> <span class="n">DataType</span><span class="p">,</span> <span class="n">State</span>
 <span class="kn">from</span> <span class="nn">.reasons</span> <span class="k">import</span> <span class="n">Reasons</span><span class="p">,</span> <span class="n">Reason</span>
 <span class="kn">from</span> <span class="nn">.stream.reader</span> <span class="k">import</span> <span class="n">WebSocketReader</span>
 <span class="kn">from</span> <span class="nn">.stream.writer</span> <span class="k">import</span> <span class="n">WebSocketWriter</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">NoCallbackException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+
+<span class="k">class</span> <span class="nc">UnexpectedFrameException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">client</span><span class="p">,</span> <span class="n">recv</span><span class="p">,</span> <span class="n">expect</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Received unexpected {recv.name.lower()} frame from client {client.addr, client.port}, &quot;</span>
+                         <span class="n">f</span><span class="s2">&quot;expected {expect.name.lower()}.&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">recieved</span> <span class="o">=</span> <span class="n">recv</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">expected</span> <span class="o">=</span> <span class="n">expect</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client</span> <span class="o">=</span> <span class="n">client</span>
+
+
+<span class="k">class</span> <span class="nc">ConnectionClosed</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s2">&quot;Closing connection in middle of message.&quot;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="Client"><a class="viewcode-back" href="../../modules/client.html#websocket.client.Client">[docs]</a><span class="k">class</span> <span class="nc">Client</span><span class="p">:</span>
@@ -73,6 +94,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">,</span> <span class="n">addr</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">writer</span><span class="p">,</span> <span class="n">loop</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_message</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">state</span> <span class="o">=</span> <span class="n">state</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">addr</span> <span class="o">=</span> <span class="n">addr</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">port</span> <span class="o">=</span> <span class="n">port</span>
@@ -86,7 +108,7 @@
 
         <span class="nd">@self</span><span class="o">.</span><span class="n">message</span>
         <span class="k">async</span> <span class="k">def</span> <span class="nf">on_message</span><span class="p">(</span><span class="n">reader</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;No message callback defined.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">NoCallbackException</span><span class="p">(</span><span class="s2">&quot;No message callback defined.&quot;</span><span class="p">)</span>
 
         <span class="nd">@self</span><span class="o">.</span><span class="n">ping</span>
         <span class="k">async</span> <span class="k">def</span> <span class="nf">on_ping</span><span class="p">(</span><span class="n">payload</span><span class="p">,</span> <span class="n">length</span><span class="p">):</span>
@@ -196,9 +218,7 @@
     <span class="k">def</span> <span class="nf">handle_data</span><span class="p">(</span><span class="n">kind</span><span class="p">):</span>
         <span class="k">async</span> <span class="k">def</span> <span class="nf">handler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reader</span><span class="p">,</span> <span class="n">fin</span><span class="p">):</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">continuation</span> <span class="o">!=</span> <span class="n">DataType</span><span class="o">.</span><span class="n">NONE</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_reader</span><span class="o">.</span><span class="n">set_exception</span><span class="p">(</span><span class="ne">Exception</span><span class="p">(</span>
-                    <span class="n">f</span><span class="s2">&quot;Received unexpected {kind.name.lower()} data frame from client {self.addr, self.port}, &quot;</span>
-                    <span class="s2">&quot;expected continuation.&quot;</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_reader</span><span class="o">.</span><span class="n">set_exception</span><span class="p">(</span><span class="n">UnexpectedFrameException</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">,</span> <span class="n">DataType</span><span class="o">.</span><span class="n">CONTINUATION</span><span class="p">))</span>
 
                 <span class="bp">self</span><span class="o">.</span><span class="n">_reader</span><span class="o">.</span><span class="n">done</span><span class="p">()</span>
                 <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">close_with_read</span><span class="p">(</span><span class="n">reader</span><span class="p">,</span> <span class="n">Reasons</span><span class="o">.</span><span class="n">PROTOCOL_ERROR</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="s2">&quot;expected continuation frame&quot;</span><span class="p">)</span>
@@ -227,7 +247,7 @@
 
     <span class="k">def</span> <span class="nf">ensure_clean_close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">continuation</span> <span class="o">!=</span> <span class="n">DataType</span><span class="o">.</span><span class="n">NONE</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_reader</span><span class="o">.</span><span class="n">set_exception</span><span class="p">(</span><span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Closing connection in middle of message.&quot;</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_reader</span><span class="o">.</span><span class="n">set_exception</span><span class="p">(</span><span class="n">ConnectionClosed</span><span class="p">())</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_reader</span><span class="o">.</span><span class="n">done</span><span class="p">()</span>
 
     <span class="nd">@staticmethod</span>
@@ -293,8 +313,10 @@
     <span class="k">async</span> <span class="k">def</span> <span class="nf">handle_undefined</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reader</span><span class="p">,</span> <span class="n">fin</span><span class="p">):</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Received invalid opcode from client {self.addr, self.port}.&quot;</span><span class="p">)</span>
 
-        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">close_with_read</span><span class="p">(</span><span class="n">reader</span><span class="p">,</span> <span class="n">Reasons</span><span class="o">.</span><span class="n">PROTOCOL_ERROR</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="s2">&quot;invalid opcode&quot;</span><span class="p">)</span></div>
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">close_with_read</span><span class="p">(</span><span class="n">reader</span><span class="p">,</span> <span class="n">Reasons</span><span class="o">.</span><span class="n">PROTOCOL_ERROR</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="s2">&quot;invalid opcode&quot;</span><span class="p">)</span>
 
+    <span class="k">def</span> <span class="nf">tick</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_message</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span></div>
 
 <span class="n">HANDLERS</span> <span class="o">=</span> <span class="p">{</span><span class="n">opcode</span><span class="p">:</span> <span class="n">Client</span><span class="o">.</span><span class="n">handle_undefined</span> <span class="k">for</span> <span class="n">opcode</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">4</span><span class="p">)}</span>
 <span class="n">HANDLERS</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
@@ -311,7 +333,20 @@
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper"><div class="relations">
+        <div class="sphinxsidebarwrapper">
+<h3><a href="../../index.html">Table Of Contents</a></h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../intro.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/buffer.html">Buffer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/client.html">Client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/enums.html">Enums</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/fragment.html">Fragment Context</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/reader.html">Reader</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/reason.html">Reasons</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/server.html">Socket</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/writer.html">Writer</a></li>
+</ul>
+<div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../../index.html">Documentation overview</a><ul>

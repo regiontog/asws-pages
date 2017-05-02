@@ -67,7 +67,7 @@
 </div>
 <dl class="class">
 <dt id="websocket.server.WebSocketServer">
-<em class="property">class </em><code class="descclassname">websocket.server.</code><code class="descname">WebSocketServer</code><span class="sig-paren">(</span><em>addr</em>, <em>port</em>, <em>certs=None</em>, <em>loop=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/websocket/server.html#WebSocketServer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#websocket.server.WebSocketServer" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">websocket.server.</code><code class="descname">WebSocketServer</code><span class="sig-paren">(</span><em>addr</em>, <em>port</em>, <em>certs=None</em>, <em>loop=None</em>, <em>timeout=120</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/websocket/server.html#WebSocketServer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#websocket.server.WebSocketServer" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -75,6 +75,7 @@
 <tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><ul class="first last simple">
 <li><strong>addr</strong> &#8211; The server IPv4 or IPv6 address.</li>
 <li><strong>port</strong> &#8211; The server port.</li>
+<li><strong>timeout</strong> &#8211; The timeout in seconds for clients, if they don&#8217;t respond to pings. Set to 0 to disable heartbeat.</li>
 <li><strong>certs</strong> &#8211; SSL certificates</li>
 <li><strong>clients</strong> &#8211; All of the connected clients.</li>
 <li><strong>loop</strong> &#8211; The event loop to run in.</li>
@@ -164,7 +165,20 @@ This callback is called when a new client connects with the websocket.</p>
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper"><div class="relations">
+        <div class="sphinxsidebarwrapper">
+<h3><a href="../index.html">Table Of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../intro.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="buffer.html">Buffer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="client.html">Client</a></li>
+<li class="toctree-l1"><a class="reference internal" href="enums.html">Enums</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fragment.html">Fragment Context</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reader.html">Reader</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reason.html">Reasons</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Socket</a></li>
+<li class="toctree-l1"><a class="reference internal" href="writer.html">Writer</a></li>
+</ul>
+<div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
