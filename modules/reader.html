@@ -55,7 +55,7 @@ callback registerd with <a class="reference internal" href="client.html#websocke
 </div>
 <dl class="class">
 <dt id="websocket.stream.reader.WebSocketReader">
-<em class="property">class </em><code class="descclassname">websocket.stream.reader.</code><code class="descname">WebSocketReader</code><span class="sig-paren">(</span><em>kind</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/websocket/stream/reader.html#WebSocketReader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#websocket.stream.reader.WebSocketReader" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">websocket.stream.reader.</code><code class="descname">WebSocketReader</code><span class="sig-paren">(</span><em>kind</em>, <em>client</em>, <em>loop</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/websocket/stream/reader.html#WebSocketReader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#websocket.stream.reader.WebSocketReader" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -67,7 +67,33 @@ callback registerd with <a class="reference internal" href="client.html#websocke
 <dl class="method">
 <dt id="websocket.stream.reader.WebSocketReader.at_eof">
 <code class="descname">at_eof</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#websocket.stream.reader.WebSocketReader.at_eof" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return True if the buffer is empty and &#8216;feed_eof&#8217; was called.</p>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True iff there is no more data to read AND we have been fed <cite>end of file</cite>.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="websocket.stream.reader.WebSocketReader.empty">
+<code class="descname">empty</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#websocket.stream.reader.WebSocketReader.empty" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True iff there is no more data to read.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="websocket.stream.reader.WebSocketReader.feed_eof">
+<code class="descname">feed_eof</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#websocket.stream.reader.WebSocketReader.feed_eof" title="Permalink to this definition">¶</a></dt>
+<dd><p>Feed the buffer with <cite>end of file</cite></p>
 </dd></dl>
 
 <dl class="method">
@@ -88,72 +114,75 @@ callback registerd with <a class="reference internal" href="client.html#websocke
 
 <dl class="method">
 <dt id="websocket.stream.reader.WebSocketReader.read">
-<code class="descname">read</code><span class="sig-paren">(</span><em>n=-1</em><span class="sig-paren">)</span><a class="headerlink" href="#websocket.stream.reader.WebSocketReader.read" title="Permalink to this definition">¶</a></dt>
-<dd><p>Read up to <cite>n</cite> bytes from the stream.</p>
-<p>If n is not provided, or set to -1, read until EOF and return all read
-bytes. If the EOF was received and the internal buffer is empty, return
-an empty bytes object.</p>
-<p>If n is zero, return empty bytes object immediately.</p>
-<p>If n is positive, this function try to read <cite>n</cite> bytes, and may return
-less or equal bytes than requested, but at least one byte. If EOF was
-received before any byte is read, this function returns empty byte
-object.</p>
-<p>Returned value is not limited with limit, configured at stream
-creation.</p>
-<p>If stream was paused, this function will automatically resume it if
-needed.</p>
+<code class="descname">read</code><span class="sig-paren">(</span><em>n=-1</em>, <em>chunksize=None</em><span class="sig-paren">)</span><a class="headerlink" href="#websocket.stream.reader.WebSocketReader.read" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read data from the buffer. Reads until eof or n bytes.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>n</strong> &#8211; The amount of data to read.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A <a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bytearray" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">bytearray</span></code></a> with the data</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
-<dt id="websocket.stream.reader.WebSocketReader.readexactly">
-<code class="descname">readexactly</code><span class="sig-paren">(</span><em>n</em><span class="sig-paren">)</span><a class="headerlink" href="#websocket.stream.reader.WebSocketReader.readexactly" title="Permalink to this definition">¶</a></dt>
-<dd><p>Read exactly <cite>n</cite> bytes.</p>
-<p>Raise an IncompleteReadError if EOF is reached before <cite>n</cite> bytes can be
-read. The IncompleteReadError.partial attribute of the exception will
-contain the partial read bytes.</p>
-<p>if n is zero, return empty bytes object.</p>
-<p>Returned value is not limited with limit, configured at stream
-creation.</p>
-<p>If stream was paused, this function will automatically resume it if
-needed.</p>
+<dt id="websocket.stream.reader.WebSocketReader.read_into">
+<code class="descname">read_into</code><span class="sig-paren">(</span><em>buffer</em>, <em>n</em>, <em>offset=0</em><span class="sig-paren">)</span><a class="headerlink" href="#websocket.stream.reader.WebSocketReader.read_into" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read data from the buffer into a bytearray. Reads until eof or n bytes.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>buffer</strong> &#8211; The bytearray to write the data into.</li>
+<li><strong>n</strong> &#8211; The amount of data to read.</li>
+<li><strong>offset</strong> &#8211; The index into buffer to write to.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
-<dt id="websocket.stream.reader.WebSocketReader.readline">
-<code class="descname">readline</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#websocket.stream.reader.WebSocketReader.readline" title="Permalink to this definition">¶</a></dt>
-<dd><p>Read chunk of data from the stream until newline (b&#8217;
-&#8216;) is found.</p>
-<blockquote>
-<div><p>On success, return chunk that ends with newline. If only partial
-line can be read due to EOF, return incomplete line without
-terminating newline. When EOF was reached while no bytes read, empty
-bytes object is returned.</p>
-<p>If limit is reached, ValueError will be raised. In that case, if
-newline was found, complete line including newline will be removed
-from internal buffer. Else, internal buffer will be cleared. Limit is
-compared against part of the line without newline.</p>
-<p>If stream was paused, this function will automatically resume it if
-needed.</p>
-</div></blockquote>
+<dt id="websocket.stream.reader.WebSocketReader.read_into_exactly">
+<code class="descname">read_into_exactly</code><span class="sig-paren">(</span><em>buffer</em>, <em>n</em><span class="sig-paren">)</span><a class="headerlink" href="#websocket.stream.reader.WebSocketReader.read_into_exactly" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read data from the buffer into a bytearray. Reads n bytes or throws an exception if reading eof.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>buffer</strong> &#8211; The bytearray to write the data into.</li>
+<li><strong>n</strong> &#8211; The amount of data to read.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
-<dt id="websocket.stream.reader.WebSocketReader.readuntil">
-<code class="descname">readuntil</code><span class="sig-paren">(</span><em>separator=b'\n'</em><span class="sig-paren">)</span><a class="headerlink" href="#websocket.stream.reader.WebSocketReader.readuntil" title="Permalink to this definition">¶</a></dt>
-<dd><p>Read data from the stream until <code class="docutils literal"><span class="pre">separator</span></code> is found.</p>
-<p>On success, the data and separator will be removed from the
-internal buffer (consumed). Returned data will include the
-separator at the end.</p>
-<p>Configured stream limit is used to check result. Limit sets the
-maximal length of data that can be returned, not counting the
-separator.</p>
-<p>If an EOF occurs and the complete separator is still not found,
-an IncompleteReadError exception will be raised, and the internal
-buffer will be reset.  The IncompleteReadError.partial attribute
-may contain the separator partially.</p>
-<p>If the data cannot be read because of over limit, a
-LimitOverrunError exception  will be raised, and the data
-will be left in the internal buffer, so it can be read again.</p>
+<dt id="websocket.stream.reader.WebSocketReader.set_exception">
+<code class="descname">set_exception</code><span class="sig-paren">(</span><em>exc</em><span class="sig-paren">)</span><a class="headerlink" href="#websocket.stream.reader.WebSocketReader.set_exception" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set an exception to raise at next read.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="websocket.stream.reader.WebSocketReader.write">
+<code class="descname">write</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="headerlink" href="#websocket.stream.reader.WebSocketReader.write" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write some data to the buffer, length must not exceed the buffer limit, or else it will block forever.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> (<em>iterable of bytes</em>) &#8211; The data to write</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </dd></dl>

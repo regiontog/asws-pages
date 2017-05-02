@@ -27,7 +27,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Enums" href="enums.html" />
-    <link rel="prev" title="Welcome to asws’s documentation!" href="../index.html" />
+    <link rel="prev" title="Buffer" href="buffer.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
@@ -46,7 +46,7 @@
   <div class="section" id="module-websocket.client">
 <span id="client"></span><h1>Client<a class="headerlink" href="#module-websocket.client" title="Permalink to this headline">¶</a></h1>
 <p>You should not make an instance of the Client class yourself, rather you should listen for new connections with 
-<code class="xref py py-meth docutils literal"><span class="pre">connection()</span></code></p>
+<a class="reference internal" href="server.html#websocket.server.WebSocketServer.connection" title="websocket.server.WebSocketServer.connection"><code class="xref py py-meth docutils literal"><span class="pre">connection()</span></code></a></p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nd">@socket</span><span class="o">.</span><span class="n">connection</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">async</span> <span class="k">def</span> <span class="nf">on_connection</span><span class="p">(</span><span class="n">client</span><span class="p">:</span> <span class="n">Client</span><span class="p">):</span>
 <span class="gp">... </span>    <span class="c1"># Here you can use the client, register callbacks on it or send it messages</span>
@@ -106,7 +106,7 @@ This callback is called when the connection this this client is closing.</p>
 <p>This callback is called when the server receives an valid data frame, 
 if an exception occurs after the first valid frame e.g. if an text frame 
 contains invalid utf-8, or if it&#8217;s an invalid fragmented message, then we 
-send the exception to the reader with <a class="reference external" href="https://docs.python.org/3.6/library/asyncio-stream.html#asyncio.StreamReader.set_exception" title="(in Python v3.6)"><code class="xref py py-meth docutils literal"><span class="pre">set_exception()</span></code></a>.</p>
+send the exception to the reader with <a class="reference internal" href="buffer.html#websocket.stream.buffer.Buffer.set_exception" title="websocket.stream.buffer.Buffer.set_exception"><code class="xref py py-meth docutils literal"><span class="pre">set_exception()</span></code></a>.</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nd">@client</span><span class="o">.</span><span class="n">message</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">async</span> <span class="k">def</span> <span class="nf">on_message</span><span class="p">(</span><span class="n">reader</span><span class="p">:</span> <span class="n">WebSocketReader</span><span class="p">):</span>
 <span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Got message &quot;</span> <span class="o">+</span> <span class="k">await</span> <span class="n">reader</span><span class="o">.</span><span class="n">get</span><span class="p">())</span>
@@ -172,7 +172,7 @@ This callback is called when we receive a valid pong from the client.</p>
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="../index.html" title="previous chapter">Welcome to asws&#8217;s documentation!</a></li>
+      <li>Previous: <a href="buffer.html" title="previous chapter">Buffer</a></li>
       <li>Next: <a href="enums.html" title="next chapter">Enums</a></li>
   </ul></li>
 </ul>

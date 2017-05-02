@@ -27,7 +27,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Reader" href="reader.html" />
-    <link rel="prev" title="Client" href="client.html" />
+    <link rel="prev" title="Enums" href="enums.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
@@ -59,13 +59,13 @@ get instances through <a class="reference internal" href="writer.html#websocket.
 <dl class="method">
 <dt id="websocket.stream.fragment.FragmentContext.send">
 <code class="descname">send</code><span class="sig-paren">(</span><em>data</em>, <em>force=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/websocket/stream/fragment.html#FragmentContext.send"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#websocket.stream.fragment.FragmentContext.send" title="Permalink to this definition">¶</a></dt>
-<dd><p>Que a message to be sent, it will be chopped into fragments and accumulated with other fragments</p>
+<dd><p>Que a message to be sent.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>data</strong> &#8211; The data you with to send, must be either <a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a> or <a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bytes" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">bytes</span></code></a>.</li>
+<li><strong>data</strong> (<em>either str</em><em> or </em><a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bytes" title="(in Python v3.6)"><em>bytes</em></a>) &#8211; The data you with to send, must be either <a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a> or <a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bytes" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">bytes</span></code></a>.</li>
 <li><strong>force</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) &#8211; If true send message even if the connection is closing e.g. we got valid message after having previously been sent a close frame from the client or after having received invalid frame(s)</li>
 </ul>
 </td>
@@ -87,7 +87,7 @@ get instances through <a class="reference internal" href="writer.html#websocket.
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="client.html" title="previous chapter">Client</a></li>
+      <li>Previous: <a href="enums.html" title="previous chapter">Enums</a></li>
       <li>Next: <a href="reader.html" title="next chapter">Reader</a></li>
   </ul></li>
 </ul>

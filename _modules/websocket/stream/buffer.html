@@ -49,7 +49,7 @@
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="Buffer"><a class="viewcode-back" href="../../../modules/buffer.html#websocket.stream.reader.Buffer">[docs]</a><span class="k">class</span> <span class="nc">Buffer</span><span class="p">:</span>
+<div class="viewcode-block" id="Buffer"><a class="viewcode-back" href="../../../modules/buffer.html#websocket.stream.buffer.Buffer">[docs]</a><span class="k">class</span> <span class="nc">Buffer</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot; &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">limit</span><span class="p">,</span> <span class="n">loop</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Creates a new asynchronous buffer for reading and writing.</span>
@@ -70,7 +70,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">eof</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">exc</span> <span class="o">=</span> <span class="kc">None</span>
 
-<div class="viewcode-block" id="Buffer.write"><a class="viewcode-back" href="../../../modules/buffer.html#websocket.stream.reader.Buffer.write">[docs]</a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+<div class="viewcode-block" id="Buffer.write"><a class="viewcode-back" href="../../../modules/buffer.html#websocket.stream.buffer.Buffer.write">[docs]</a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Write some data to the buffer, length must not exceed the buffer limit, or else it will block forever.</span>
 <span class="sd">        </span>
 <span class="sd">        :param data: The data to write</span>
@@ -96,7 +96,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">write_signal</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">write_signal</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="Buffer.read"><a class="viewcode-back" href="../../../modules/buffer.html#websocket.stream.reader.Buffer.read">[docs]</a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">chunksize</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Buffer.read"><a class="viewcode-back" href="../../../modules/buffer.html#websocket.stream.buffer.Buffer.read">[docs]</a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">chunksize</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Read data from the buffer. Reads until eof or n bytes.</span>
 <span class="sd">        </span>
 <span class="sd">        :param n: The amount of data to read.</span>
@@ -124,7 +124,7 @@
 
         <span class="k">return</span> <span class="n">result</span></div>
 
-<div class="viewcode-block" id="Buffer.read_into_exactly"><a class="viewcode-back" href="../../../modules/buffer.html#websocket.stream.reader.Buffer.read_into_exactly">[docs]</a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">read_into_exactly</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buffer</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+<div class="viewcode-block" id="Buffer.read_into_exactly"><a class="viewcode-back" href="../../../modules/buffer.html#websocket.stream.buffer.Buffer.read_into_exactly">[docs]</a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">read_into_exactly</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buffer</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Read data from the buffer into a bytearray. Reads n bytes or throws an exception if reading eof.</span>
 
 <span class="sd">        :param buffer: The bytearray to write the data into.</span>
@@ -159,7 +159,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">read_signal</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">read_signal</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="Buffer.read_into"><a class="viewcode-back" href="../../../modules/buffer.html#websocket.stream.reader.Buffer.read_into">[docs]</a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">read_into</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buffer</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<div class="viewcode-block" id="Buffer.read_into"><a class="viewcode-back" href="../../../modules/buffer.html#websocket.stream.buffer.Buffer.read_into">[docs]</a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">read_into</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buffer</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Read data from the buffer into a bytearray. Reads until eof or n bytes.</span>
 
 <span class="sd">        :param buffer: The bytearray to write the data into.</span>
@@ -195,25 +195,25 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">read_signal</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">n</span></div>
 
-<div class="viewcode-block" id="Buffer.feed_eof"><a class="viewcode-back" href="../../../modules/buffer.html#websocket.stream.reader.Buffer.feed_eof">[docs]</a>    <span class="k">def</span> <span class="nf">feed_eof</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Buffer.feed_eof"><a class="viewcode-back" href="../../../modules/buffer.html#websocket.stream.buffer.Buffer.feed_eof">[docs]</a>    <span class="k">def</span> <span class="nf">feed_eof</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Feed the buffer with `end of file`&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">eof</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">write_available</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">write_signal</span><span class="o">.</span><span class="n">set</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="Buffer.empty"><a class="viewcode-back" href="../../../modules/buffer.html#websocket.stream.reader.Buffer.empty">[docs]</a>    <span class="k">def</span> <span class="nf">empty</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Buffer.empty"><a class="viewcode-back" href="../../../modules/buffer.html#websocket.stream.buffer.Buffer.empty">[docs]</a>    <span class="k">def</span> <span class="nf">empty</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        :return: True iff there is no more data to read.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_available</span> <span class="o">==</span> <span class="mi">0</span></div>
 
-<div class="viewcode-block" id="Buffer.at_eof"><a class="viewcode-back" href="../../../modules/buffer.html#websocket.stream.reader.Buffer.at_eof">[docs]</a>    <span class="k">def</span> <span class="nf">at_eof</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Buffer.at_eof"><a class="viewcode-back" href="../../../modules/buffer.html#websocket.stream.buffer.Buffer.at_eof">[docs]</a>    <span class="k">def</span> <span class="nf">at_eof</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        :return: True iff there is no more data to read AND we have been fed `end of file`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">eof</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_available</span> <span class="o">==</span> <span class="mi">0</span></div>
 
-<div class="viewcode-block" id="Buffer.set_exception"><a class="viewcode-back" href="../../../modules/buffer.html#websocket.stream.reader.Buffer.set_exception">[docs]</a>    <span class="k">def</span> <span class="nf">set_exception</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exc</span><span class="p">):</span>
+<div class="viewcode-block" id="Buffer.set_exception"><a class="viewcode-back" href="../../../modules/buffer.html#websocket.stream.buffer.Buffer.set_exception">[docs]</a>    <span class="k">def</span> <span class="nf">set_exception</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exc</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Set an exception to raise at next read.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">exc</span> <span class="o">=</span> <span class="n">exc</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">write_available</span> <span class="o">=</span> <span class="mi">0</span>

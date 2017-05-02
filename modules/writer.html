@@ -61,16 +61,35 @@ make use of it through <code class="xref py py-attr docutils literal"><span clas
 </tbody>
 </table>
 <dl class="method">
+<dt id="websocket.stream.writer.WebSocketWriter.feed">
+<code class="descname">feed</code><span class="sig-paren">(</span><em>buffer</em>, <em>op_code=None</em>, <em>chunksize=1024</em>, <em>drain_every=4096</em>, <em>force=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/websocket/stream/writer.html#WebSocketWriter.feed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#websocket.stream.writer.WebSocketWriter.feed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Feed the contents of a <a class="reference internal" href="buffer.html#websocket.stream.buffer.Buffer" title="websocket.stream.buffer.Buffer"><code class="xref py py-class docutils literal"><span class="pre">Buffer</span></code></a> to the client in <cite>chunksize</cite> fragments.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>buffer</strong> (<a class="reference internal" href="buffer.html#websocket.stream.buffer.Buffer" title="websocket.stream.buffer.Buffer"><em>Buffer</em></a>) &#8211; The buffer to read from</li>
+<li><strong>op_code</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a>) &#8211; The type of data to send, see <a class="reference internal" href="enums.html#websocket.enums.DataType" title="websocket.enums.DataType"><code class="xref py py-class docutils literal"><span class="pre">DataType</span></code></a>, if None try to read buffer.data_type as if buffer was a <a class="reference internal" href="reader.html#websocket.stream.reader.WebSocketReader" title="websocket.stream.reader.WebSocketReader"><code class="xref py py-class docutils literal"><span class="pre">WebSocketReader</span></code></a></li>
+<li><strong>chunksize</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a>) &#8211; The size of each fragment</li>
+<li><strong>drain_every</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a>) &#8211; How often we forcefully drain the writer</li>
+<li><strong>force</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) &#8211; If true send message even if the connection is closing e.g. we got valid message after having previously been sent a close frame from the client or after having received invalid frame(s)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
 <dt id="websocket.stream.writer.WebSocketWriter.fragment">
-<code class="descname">fragment</code><span class="sig-paren">(</span><em>chunksize=512</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/websocket/stream/writer.html#WebSocketWriter.fragment"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#websocket.stream.writer.WebSocketWriter.fragment" title="Permalink to this definition">¶</a></dt>
+<code class="descname">fragment</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/websocket/stream/writer.html#WebSocketWriter.fragment"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#websocket.stream.writer.WebSocketWriter.fragment" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a async context manager that can send fragmented messages.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>chunksize</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a>) &#8211; The size of each fragment to send.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><a class="reference internal" href="fragment.html#websocket.stream.fragment.FragmentContext" title="websocket.stream.fragment.FragmentContext"><code class="xref py py-class docutils literal"><span class="pre">FragmentContext</span></code></a></td>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><a class="reference internal" href="fragment.html#websocket.stream.fragment.FragmentContext" title="websocket.stream.fragment.FragmentContext"><code class="xref py py-class docutils literal"><span class="pre">FragmentContext</span></code></a></td>
 </tr>
 </tbody>
 </table>
@@ -111,14 +130,33 @@ make use of it through <code class="xref py py-attr docutils literal"><span clas
 <dl class="method">
 <dt id="websocket.stream.writer.WebSocketWriter.send">
 <code class="descname">send</code><span class="sig-paren">(</span><em>data</em>, <em>force=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/websocket/stream/writer.html#WebSocketWriter.send"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#websocket.stream.writer.WebSocketWriter.send" title="Permalink to this definition">¶</a></dt>
-<dd><p>Send a data frame to the client, the type of data is determined from the data parameter.</p>
+<dd><p>Send some data to the client, the type of data is determined from the data parameter.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>data</strong> &#8211; The data you with to send, must be either <a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a> or <a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bytes" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">bytes</span></code></a>.</li>
+<li><strong>data</strong> &#8211; The data you wish to send, must be either <a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a> or <a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bytes" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">bytes</span></code></a>.</li>
 <li><strong>force</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) &#8211; If true send message even if the connection is closing e.g. we got valid message after having previously been sent a close frame from the client or after having received invalid frame(s)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="websocket.stream.writer.WebSocketWriter.write_frame">
+<code class="descname">write_frame</code><span class="sig-paren">(</span><em>header</em>, <em>data</em>, <em>length</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/websocket/stream/writer.html#WebSocketWriter.write_frame"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#websocket.stream.writer.WebSocketWriter.write_frame" title="Permalink to this definition">¶</a></dt>
+<dd><p>Low level method to write a frame to the client, does not flush.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>header</strong> &#8211; The frame header, containing the frame type and the fin bit</li>
+<li><strong>data</strong> &#8211; The data to include in the frame</li>
+<li><strong>length</strong> &#8211; The length of the data</li>
 </ul>
 </td>
 </tr>

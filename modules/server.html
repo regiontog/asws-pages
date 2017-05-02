@@ -59,7 +59,7 @@
 <span class="gp">... </span>        <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="k">await</span> <span class="n">reader</span><span class="o">.</span><span class="n">get</span><span class="p">())</span>
 <span class="gp">...</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">socket</span> <span class="k">as</span> <span class="n">server</span><span class="p">:</span>
-<span class="gp">... </span>    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Serving on {server.sockets[0].getsockname()}&#39;</span><span class="p">)</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Serving on {server.sockets[0].getsockname()}&#39;</span><span class="p">)</span>
 <span class="gp">... </span>    <span class="n">loop</span><span class="o">.</span><span class="n">run_forever</span><span class="p">()</span>
 <span class="gp">...</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">loop</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
@@ -75,7 +75,7 @@
 <tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><ul class="first last simple">
 <li><strong>addr</strong> &#8211; The server IPv4 or IPv6 address.</li>
 <li><strong>port</strong> &#8211; The server port.</li>
-<li><strong>certs</strong> &#8211; SSL certifications</li>
+<li><strong>certs</strong> &#8211; SSL certificates</li>
 <li><strong>clients</strong> &#8211; All of the connected clients.</li>
 <li><strong>loop</strong> &#8211; The event loop to run in.</li>
 </ul>
@@ -111,7 +111,7 @@ This callback is called when a new client connects with the websocket.</p>
 
 <dl class="method">
 <dt id="websocket.server.WebSocketServer.disconnect_client">
-<code class="descname">disconnect_client</code><span class="sig-paren">(</span><em>client</em>, <em>port=None</em>, <em>code=b'\x03\xe8'</em>, <em>reason=''</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/websocket/server.html#WebSocketServer.disconnect_client"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#websocket.server.WebSocketServer.disconnect_client" title="Permalink to this definition">¶</a></dt>
+<code class="descname">disconnect_client</code><span class="sig-paren">(</span><em>client</em>, <em>code=b'\x03\xe8'</em>, <em>reason=''</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/websocket/server.html#WebSocketServer.disconnect_client"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#websocket.server.WebSocketServer.disconnect_client" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method is the only clean way to close a connection with a client.</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nd">@socket</span><span class="o">.</span><span class="n">connection</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">async</span> <span class="k">def</span> <span class="nf">on_connection</span><span class="p">(</span><span class="n">client</span><span class="p">:</span> <span class="n">Client</span><span class="p">):</span>
@@ -124,9 +124,8 @@ This callback is called when a new client connects with the websocket.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>client</strong> &#8211; Depends on port parameter.</li>
-<li><strong>port</strong> &#8211; If port is None try to disconnect client, else interpret client as the client address</li>
-<li><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bytes" title="(in Python v3.6)"><em>bytes</em></a>) &#8211; The code to close the connection with, make sure it is valid. 99% of the time it should be <code class="xref py py-attr docutils literal"><span class="pre">websocket.reasons.Reasons.NORMAL.value.code</span></code></li>
+<li><strong>client</strong> &#8211; The client to disconnect from the server.</li>
+<li><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bytes" title="(in Python v3.6)"><em>bytes</em></a>) &#8211; The code to close the connection with, make sure it is valid. Default is <code class="xref py py-attr docutils literal"><span class="pre">websocket.reasons.Reasons.NORMAL.value.code</span></code></li>
 <li><strong>reason</strong> (<a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) &#8211; The reason for closing the connection, may be &#8216;&#8217;. Should not be longer than 123 characters.</li>
 </ul>
 </td>
