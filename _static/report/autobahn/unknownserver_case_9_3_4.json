@@ -8,7 +8,7 @@
    "createWirelog": true,
    "description": "Send fragmented text message message with message payload of length 4 * 2**20 (4M). Sent out in fragments of 4k.",
    "droppedByMe": false,
-   "duration": 1100,
+   "duration": 1275,
    "expectation": "Receive echo'ed text message (with payload as sent).",
    "expected": {},
    "expectedClose": {
@@ -19,8 +19,8 @@
       "requireClean": true
    },
    "failedByMe": false,
-   "httpRequest": "GET / HTTP/1.1\r\nUser-Agent: AutobahnTestSuite/0.7.6-0.10.9\r\nHost: 127.0.0.1:3001\r\nUpgrade: WebSocket\r\nConnection: Upgrade\r\nPragma: no-cache\r\nCache-Control: no-cache\r\nSec-WebSocket-Key: pi0eeLIAMnfArJIdqbVCvw==\r\nSec-WebSocket-Version: 13\r\n\r\n",
-   "httpResponse": "HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Accept: 5hfwED+v29j75eBkfymhz9YgVW0=\r\n\r\n",
+   "httpRequest": "GET / HTTP/1.1\r\nUser-Agent: AutobahnTestSuite/0.7.6-0.10.9\r\nHost: 127.0.0.1:3001\r\nUpgrade: WebSocket\r\nConnection: Upgrade\r\nPragma: no-cache\r\nCache-Control: no-cache\r\nSec-WebSocket-Key: HurGnDxoeDX0ANugj/xAsA==\r\nSec-WebSocket-Version: 13\r\n\r\n",
+   "httpResponse": "HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Accept: 27U0HazgiHa/J2fwZ+e5K3Rzohs=\r\n\r\n",
    "id": "9.3.4",
    "isServer": false,
    "localCloseCode": 1000,
@@ -41,12 +41,12 @@
       "2": 1,
       "4": 1,
       "129": 1,
-      "1028": 443,
-      "2056": 1163,
-      "3084": 433,
+      "1028": 476,
+      "2056": 1121,
+      "3084": 450,
       "4112": 7
    },
-   "started": "2017-05-02T14:38:05.817Z",
+   "started": "2017-05-02T17:31:31.732Z",
    "trafficStats": null,
    "txFrameStats": {
       "0": 1024,
@@ -93,7 +93,7 @@
          8,
          true,
          0,
-         "b7d6b84d",
+         "fa71a680",
          null,
          null,
          false
@@ -102,7 +102,7 @@
          "TO",
          [
             8,
-            "8882b7d6b84db43e"
+            "8882fa71a680f999"
          ],
          false
       ],

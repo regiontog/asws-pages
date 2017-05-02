@@ -8,7 +8,7 @@
    "createWirelog": true,
    "description": "Send 1000 binary messages of payload size 1024 to measure implementation/network RTT (round trip time) / latency.",
    "droppedByMe": false,
-   "duration": 815,
+   "duration": 750,
    "expectation": "Receive echo'ed binary messages (with payload as sent). Timeout case after 240 secs.",
    "expected": {},
    "expectedClose": {
@@ -19,8 +19,8 @@
       "requireClean": true
    },
    "failedByMe": false,
-   "httpRequest": "GET / HTTP/1.1\r\nUser-Agent: AutobahnTestSuite/0.7.6-0.10.9\r\nHost: 127.0.0.1:3001\r\nUpgrade: WebSocket\r\nConnection: Upgrade\r\nPragma: no-cache\r\nCache-Control: no-cache\r\nSec-WebSocket-Key: m8NPGFmlsf2XMQcMatZ/3g==\r\nSec-WebSocket-Version: 13\r\n\r\n",
-   "httpResponse": "HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Accept: RzaoJPHJ+WS+f7lBMgVKN6ono5A=\r\n\r\n",
+   "httpRequest": "GET / HTTP/1.1\r\nUser-Agent: AutobahnTestSuite/0.7.6-0.10.9\r\nHost: 127.0.0.1:3001\r\nUpgrade: WebSocket\r\nConnection: Upgrade\r\nPragma: no-cache\r\nCache-Control: no-cache\r\nSec-WebSocket-Key: aa/RZMTXGVETln4AqsaDSQ==\r\nSec-WebSocket-Version: 13\r\n\r\n",
+   "httpResponse": "HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Accept: InzQ2Km/yo8Wq4f3zW24q+zAahc=\r\n\r\n",
    "id": "9.8.5",
    "isServer": false,
    "localCloseCode": 1000,
@@ -38,13 +38,13 @@
       "8": 1
    },
    "rxOctetStats": {
-      "2": 996,
+      "2": 998,
       "4": 1,
       "129": 1,
-      "1028": 996,
-      "1030": 4
+      "1028": 998,
+      "1030": 2
    },
-   "started": "2017-05-02T14:39:44.440Z",
+   "started": "2017-05-02T17:33:09.379Z",
    "trafficStats": null,
    "txFrameStats": {
       "2": 1000,
@@ -97,7 +97,7 @@
          8,
          true,
          0,
-         "9166dc39",
+         "aa017c57",
          null,
          null,
          false
@@ -106,7 +106,7 @@
          "TO",
          [
             8,
-            "88829166dc39928e"
+            "8882aa017c57a9e9"
          ],
          false
       ],

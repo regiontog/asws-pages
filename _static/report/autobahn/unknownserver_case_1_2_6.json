@@ -8,7 +8,7 @@
    "createWirelog": true,
    "description": "Send binary message message with payload of length 65535.",
    "droppedByMe": false,
-   "duration": 71,
+   "duration": 60,
    "expectation": "Receive echo'ed binary message (with payload as sent). Clean close with normal code.",
    "expected": {
       "OK": [
@@ -27,8 +27,8 @@
       "requireClean": true
    },
    "failedByMe": false,
-   "httpRequest": "GET / HTTP/1.1\r\nUser-Agent: AutobahnTestSuite/0.7.6-0.10.9\r\nHost: 127.0.0.1:3001\r\nUpgrade: WebSocket\r\nConnection: Upgrade\r\nPragma: no-cache\r\nCache-Control: no-cache\r\nSec-WebSocket-Key: NMBFu7gLeITeR79e+jR9Vw==\r\nSec-WebSocket-Version: 13\r\n\r\n",
-   "httpResponse": "HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Accept: EfBoozrFR1H+WJJfcmBjcmBYJdk=\r\n\r\n",
+   "httpRequest": "GET / HTTP/1.1\r\nUser-Agent: AutobahnTestSuite/0.7.6-0.10.9\r\nHost: 127.0.0.1:3001\r\nUpgrade: WebSocket\r\nConnection: Upgrade\r\nPragma: no-cache\r\nCache-Control: no-cache\r\nSec-WebSocket-Key: 5tt4cdVGcdSaVbrC6qblJQ==\r\nSec-WebSocket-Version: 13\r\n\r\n",
+   "httpResponse": "HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Accept: UrsmLR0EwL/L/iKsXkGjuiWk7H8=\r\n\r\n",
    "id": "1.2.6",
    "isServer": false,
    "localCloseCode": 1000,
@@ -56,14 +56,15 @@
       "129": 1,
       "1027": 1,
       "1028": 1,
-      "2056": 8,
-      "3084": 2,
+      "2056": 2,
+      "3084": 5,
       "4112": 1,
       "6168": 1,
-      "7196": 2,
-      "8224": 2
+      "7196": 1,
+      "8224": 1,
+      "9252": 2
    },
-   "started": "2017-05-02T14:30:44.160Z",
+   "started": "2017-05-02T17:30:49.420Z",
    "trafficStats": null,
    "txFrameStats": {
       "2": 1,
@@ -104,7 +105,7 @@
          2,
          true,
          0,
-         "96f94f4a",
+         "5083a757",
          null,
          null,
          false
@@ -113,7 +114,7 @@
          "TO",
          [
             65543,
-            "82feffff96f94f4a6807b1b46807b1b46807b1b46807b1b46807b1b46807b1b46807b1b46807b1b46807b1b46807b1b46807b1b46807b1b46807b1b46807b1b4 ..."
+            "82feffff5083a757ae7d59a9ae7d59a9ae7d59a9ae7d59a9ae7d59a9ae7d59a9ae7d59a9ae7d59a9ae7d59a9ae7d59a9ae7d59a9ae7d59a9ae7d59a9ae7d59a9 ..."
          ],
          false
       ],
@@ -124,7 +125,7 @@
       [
          "RO",
          [
-            2056,
+            4112,
             "027e0400fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe ..."
          ]
       ],
@@ -135,6 +136,30 @@
             "0xfefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe ..."
          ],
          2,
+         false,
+         0,
+         false,
+         null
+      ],
+      [
+         "RF",
+         [
+            1024,
+            "0xfefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe ..."
+         ],
+         0,
+         false,
+         0,
+         false,
+         null
+      ],
+      [
+         "RF",
+         [
+            1024,
+            "0xfefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe ..."
+         ],
+         0,
          false,
          0,
          false,
@@ -258,159 +283,6 @@
       [
          "RO",
          [
-            2056,
-            "007e0400fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe ..."
-         ]
-      ],
-      [
-         "RF",
-         [
-            1024,
-            "0xfefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe ..."
-         ],
-         0,
-         false,
-         0,
-         false,
-         null
-      ],
-      [
-         "RF",
-         [
-            1024,
-            "0xfefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe ..."
-         ],
-         0,
-         false,
-         0,
-         false,
-         null
-      ],
-      [
-         "RO",
-         [
-            2056,
-            "007e0400fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe ..."
-         ]
-      ],
-      [
-         "RF",
-         [
-            1024,
-            "0xfefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe ..."
-         ],
-         0,
-         false,
-         0,
-         false,
-         null
-      ],
-      [
-         "RF",
-         [
-            1024,
-            "0xfefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe ..."
-         ],
-         0,
-         false,
-         0,
-         false,
-         null
-      ],
-      [
-         "RO",
-         [
-            7196,
-            "007e0400fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe ..."
-         ]
-      ],
-      [
-         "RF",
-         [
-            1024,
-            "0xfefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe ..."
-         ],
-         0,
-         false,
-         0,
-         false,
-         null
-      ],
-      [
-         "RF",
-         [
-            1024,
-            "0xfefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe ..."
-         ],
-         0,
-         false,
-         0,
-         false,
-         null
-      ],
-      [
-         "RF",
-         [
-            1024,
-            "0xfefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe ..."
-         ],
-         0,
-         false,
-         0,
-         false,
-         null
-      ],
-      [
-         "RF",
-         [
-            1024,
-            "0xfefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe ..."
-         ],
-         0,
-         false,
-         0,
-         false,
-         null
-      ],
-      [
-         "RF",
-         [
-            1024,
-            "0xfefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe ..."
-         ],
-         0,
-         false,
-         0,
-         false,
-         null
-      ],
-      [
-         "RF",
-         [
-            1024,
-            "0xfefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe ..."
-         ],
-         0,
-         false,
-         0,
-         false,
-         null
-      ],
-      [
-         "RF",
-         [
-            1024,
-            "0xfefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe ..."
-         ],
-         0,
-         false,
-         0,
-         false,
-         null
-      ],
-      [
-         "RO",
-         [
             3084,
             "007e0400fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe ..."
          ]
@@ -426,37 +298,6 @@
          0,
          false,
          null
-      ],
-      [
-         "RF",
-         [
-            1024,
-            "0xfefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe ..."
-         ],
-         0,
-         false,
-         0,
-         false,
-         null
-      ],
-      [
-         "RF",
-         [
-            1024,
-            "0xfefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe ..."
-         ],
-         0,
-         false,
-         0,
-         false,
-         null
-      ],
-      [
-         "RO",
-         [
-            2056,
-            "007e0400fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe ..."
-         ]
       ],
       [
          "RF",
@@ -564,9 +405,313 @@
       [
          "RO",
          [
-            4112,
+            3084,
             "007e0400fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe ..."
          ]
+      ],
+      [
+         "RF",
+         [
+            1024,
+            "0xfefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe ..."
+         ],
+         0,
+         false,
+         0,
+         false,
+         null
+      ],
+      [
+         "RF",
+         [
+            1024,
+            "0xfefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe ..."
+         ],
+         0,
+         false,
+         0,
+         false,
+         null
+      ],
+      [
+         "RF",
+         [
+            1024,
+            "0xfefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe ..."
+         ],
+         0,
+         false,
+         0,
+         false,
+         null
+      ],
+      [
+         "RO",
+         [
+            3084,
+            "007e0400fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe ..."
+         ]
+      ],
+      [
+         "RF",
+         [
+            1024,
+            "0xfefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe ..."
+         ],
+         0,
+         false,
+         0,
+         false,
+         null
+      ],
+      [
+         "RF",
+         [
+            1024,
+            "0xfefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe ..."
+         ],
+         0,
+         false,
+         0,
+         false,
+         null
+      ],
+      [
+         "RF",
+         [
+            1024,
+            "0xfefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe ..."
+         ],
+         0,
+         false,
+         0,
+         false,
+         null
+      ],
+      [
+         "RO",
+         [
+            9252,
+            "007e0400fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe ..."
+         ]
+      ],
+      [
+         "RF",
+         [
+            1024,
+            "0xfefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe ..."
+         ],
+         0,
+         false,
+         0,
+         false,
+         null
+      ],
+      [
+         "RF",
+         [
+            1024,
+            "0xfefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe ..."
+         ],
+         0,
+         false,
+         0,
+         false,
+         null
+      ],
+      [
+         "RF",
+         [
+            1024,
+            "0xfefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe ..."
+         ],
+         0,
+         false,
+         0,
+         false,
+         null
+      ],
+      [
+         "RF",
+         [
+            1024,
+            "0xfefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe ..."
+         ],
+         0,
+         false,
+         0,
+         false,
+         null
+      ],
+      [
+         "RF",
+         [
+            1024,
+            "0xfefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe ..."
+         ],
+         0,
+         false,
+         0,
+         false,
+         null
+      ],
+      [
+         "RF",
+         [
+            1024,
+            "0xfefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe ..."
+         ],
+         0,
+         false,
+         0,
+         false,
+         null
+      ],
+      [
+         "RF",
+         [
+            1024,
+            "0xfefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe ..."
+         ],
+         0,
+         false,
+         0,
+         false,
+         null
+      ],
+      [
+         "RF",
+         [
+            1024,
+            "0xfefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe ..."
+         ],
+         0,
+         false,
+         0,
+         false,
+         null
+      ],
+      [
+         "RF",
+         [
+            1024,
+            "0xfefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe ..."
+         ],
+         0,
+         false,
+         0,
+         false,
+         null
+      ],
+      [
+         "RO",
+         [
+            3084,
+            "007e0400fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe ..."
+         ]
+      ],
+      [
+         "RF",
+         [
+            1024,
+            "0xfefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe ..."
+         ],
+         0,
+         false,
+         0,
+         false,
+         null
+      ],
+      [
+         "RF",
+         [
+            1024,
+            "0xfefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe ..."
+         ],
+         0,
+         false,
+         0,
+         false,
+         null
+      ],
+      [
+         "RF",
+         [
+            1024,
+            "0xfefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe ..."
+         ],
+         0,
+         false,
+         0,
+         false,
+         null
+      ],
+      [
+         "RO",
+         [
+            9252,
+            "007e0400fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe ..."
+         ]
+      ],
+      [
+         "RF",
+         [
+            1024,
+            "0xfefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe ..."
+         ],
+         0,
+         false,
+         0,
+         false,
+         null
+      ],
+      [
+         "RF",
+         [
+            1024,
+            "0xfefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe ..."
+         ],
+         0,
+         false,
+         0,
+         false,
+         null
+      ],
+      [
+         "RF",
+         [
+            1024,
+            "0xfefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe ..."
+         ],
+         0,
+         false,
+         0,
+         false,
+         null
+      ],
+      [
+         "RF",
+         [
+            1024,
+            "0xfefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe ..."
+         ],
+         0,
+         false,
+         0,
+         false,
+         null
+      ],
+      [
+         "RF",
+         [
+            1024,
+            "0xfefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe ..."
+         ],
+         0,
+         false,
+         0,
+         false,
+         null
       ],
       [
          "RF",
@@ -784,171 +929,6 @@
       [
          "RO",
          [
-            2056,
-            "007e0400fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe ..."
-         ]
-      ],
-      [
-         "RF",
-         [
-            1024,
-            "0xfefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe ..."
-         ],
-         0,
-         false,
-         0,
-         false,
-         null
-      ],
-      [
-         "RF",
-         [
-            1024,
-            "0xfefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe ..."
-         ],
-         0,
-         false,
-         0,
-         false,
-         null
-      ],
-      [
-         "RO",
-         [
-            8224,
-            "007e0400fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe ..."
-         ]
-      ],
-      [
-         "RF",
-         [
-            1024,
-            "0xfefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe ..."
-         ],
-         0,
-         false,
-         0,
-         false,
-         null
-      ],
-      [
-         "RF",
-         [
-            1024,
-            "0xfefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe ..."
-         ],
-         0,
-         false,
-         0,
-         false,
-         null
-      ],
-      [
-         "RF",
-         [
-            1024,
-            "0xfefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe ..."
-         ],
-         0,
-         false,
-         0,
-         false,
-         null
-      ],
-      [
-         "RF",
-         [
-            1024,
-            "0xfefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe ..."
-         ],
-         0,
-         false,
-         0,
-         false,
-         null
-      ],
-      [
-         "RF",
-         [
-            1024,
-            "0xfefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe ..."
-         ],
-         0,
-         false,
-         0,
-         false,
-         null
-      ],
-      [
-         "RF",
-         [
-            1024,
-            "0xfefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe ..."
-         ],
-         0,
-         false,
-         0,
-         false,
-         null
-      ],
-      [
-         "RF",
-         [
-            1024,
-            "0xfefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe ..."
-         ],
-         0,
-         false,
-         0,
-         false,
-         null
-      ],
-      [
-         "RF",
-         [
-            1024,
-            "0xfefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe ..."
-         ],
-         0,
-         false,
-         0,
-         false,
-         null
-      ],
-      [
-         "RO",
-         [
-            2056,
-            "007e0400fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe ..."
-         ]
-      ],
-      [
-         "RF",
-         [
-            1024,
-            "0xfefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe ..."
-         ],
-         0,
-         false,
-         0,
-         false,
-         null
-      ],
-      [
-         "RF",
-         [
-            1024,
-            "0xfefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe ..."
-         ],
-         0,
-         false,
-         0,
-         false,
-         null
-      ],
-      [
-         "RO",
-         [
             1028,
             "007e0400fefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefefe ..."
          ]
@@ -1024,7 +1004,7 @@
          8,
          true,
          0,
-         "d9c7ca07",
+         "dc5356b2",
          null,
          null,
          false
@@ -1033,7 +1013,7 @@
          "TO",
          [
             8,
-            "8882d9c7ca07da2f"
+            "8882dc5356b2dfbb"
          ],
          false
       ],

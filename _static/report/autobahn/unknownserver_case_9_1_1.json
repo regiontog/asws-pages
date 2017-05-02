@@ -8,7 +8,7 @@
    "createWirelog": true,
    "description": "Send text message message with payload of length 64 * 2**10 (64k).",
    "droppedByMe": false,
-   "duration": 28,
+   "duration": 22,
    "expectation": "Receive echo'ed text message (with payload as sent).",
    "expected": {},
    "expectedClose": {
@@ -19,8 +19,8 @@
       "requireClean": true
    },
    "failedByMe": false,
-   "httpRequest": "GET / HTTP/1.1\r\nUser-Agent: AutobahnTestSuite/0.7.6-0.10.9\r\nHost: 127.0.0.1:3001\r\nUpgrade: WebSocket\r\nConnection: Upgrade\r\nPragma: no-cache\r\nCache-Control: no-cache\r\nSec-WebSocket-Key: KR6XwN0I8us0BDkeL4sC7w==\r\nSec-WebSocket-Version: 13\r\n\r\n",
-   "httpResponse": "HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Accept: VddOVpmyEDyPEqKdMTb86M/Md8w=\r\n\r\n",
+   "httpRequest": "GET / HTTP/1.1\r\nUser-Agent: AutobahnTestSuite/0.7.6-0.10.9\r\nHost: 127.0.0.1:3001\r\nUpgrade: WebSocket\r\nConnection: Upgrade\r\nPragma: no-cache\r\nCache-Control: no-cache\r\nSec-WebSocket-Key: mnA5JKmWYJyZrOWPeEaeZA==\r\nSec-WebSocket-Version: 13\r\n\r\n",
+   "httpResponse": "HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Accept: NBeDW4zw1z6Jls72WbRy7TAV8gg=\r\n\r\n",
    "id": "9.1.1",
    "isServer": false,
    "localCloseCode": 1000,
@@ -42,14 +42,15 @@
       "4": 1,
       "129": 1,
       "1028": 2,
-      "2056": 5,
-      "3084": 5,
-      "4112": 2,
-      "5140": 3,
+      "2056": 4,
+      "3084": 4,
+      "4112": 1,
       "6168": 1,
-      "8224": 1
+      "7196": 1,
+      "8224": 2,
+      "9252": 1
    },
-   "started": "2017-05-02T14:37:35.880Z",
+   "started": "2017-05-02T17:31:01.435Z",
    "trafficStats": null,
    "txFrameStats": {
       "1": 1,
@@ -94,7 +95,7 @@
          8,
          true,
          0,
-         "d27cd3d4",
+         "3fee70e0",
          null,
          null,
          false
@@ -103,7 +104,7 @@
          "TO",
          [
             8,
-            "8882d27cd3d4d194"
+            "88823fee70e03c06"
          ],
          false
       ],

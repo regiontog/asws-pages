@@ -8,7 +8,7 @@
    "createWirelog": true,
    "description": "Send fragmented binary message message with message payload of length 4 * 2**20 (4M). Sent out in fragments of 4k.",
    "droppedByMe": false,
-   "duration": 1109,
+   "duration": 1283,
    "expectation": "Receive echo'ed binary message (with payload as sent).",
    "expected": {},
    "expectedClose": {
@@ -19,8 +19,8 @@
       "requireClean": true
    },
    "failedByMe": false,
-   "httpRequest": "GET / HTTP/1.1\r\nUser-Agent: AutobahnTestSuite/0.7.6-0.10.9\r\nHost: 127.0.0.1:3001\r\nUpgrade: WebSocket\r\nConnection: Upgrade\r\nPragma: no-cache\r\nCache-Control: no-cache\r\nSec-WebSocket-Key: qW5eAZ3ScbJIeEU/9CEIgQ==\r\nSec-WebSocket-Version: 13\r\n\r\n",
-   "httpResponse": "HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Accept: hihym7lz+IaiV6BahN8i66zf0+4=\r\n\r\n",
+   "httpRequest": "GET / HTTP/1.1\r\nUser-Agent: AutobahnTestSuite/0.7.6-0.10.9\r\nHost: 127.0.0.1:3001\r\nUpgrade: WebSocket\r\nConnection: Upgrade\r\nPragma: no-cache\r\nCache-Control: no-cache\r\nSec-WebSocket-Key: geeD5MEdOB4tTxguh1cD6w==\r\nSec-WebSocket-Version: 13\r\n\r\n",
+   "httpResponse": "HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Accept: fIwas5yhaUD1f/YzIh3WaxyuHC0=\r\n\r\n",
    "id": "9.4.4",
    "isServer": false,
    "localCloseCode": 1000,
@@ -41,12 +41,12 @@
       "2": 1,
       "4": 1,
       "129": 1,
-      "1028": 491,
-      "2056": 1073,
-      "3084": 477,
-      "4112": 7
+      "1028": 571,
+      "2056": 915,
+      "3084": 553,
+      "4112": 9
    },
-   "started": "2017-05-02T14:38:26.127Z",
+   "started": "2017-05-02T17:31:51.055Z",
    "trafficStats": null,
    "txFrameStats": {
       "0": 1024,
@@ -93,7 +93,7 @@
          8,
          true,
          0,
-         "335e7b96",
+         "8e990a8e",
          null,
          null,
          false
@@ -102,7 +102,7 @@
          "TO",
          [
             8,
-            "8882335e7b9630b6"
+            "88828e990a8e8d71"
          ],
          false
       ],

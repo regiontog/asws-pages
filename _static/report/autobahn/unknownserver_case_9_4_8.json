@@ -8,7 +8,7 @@
    "createWirelog": true,
    "description": "Send fragmented binary message message with message payload of length 4 * 2**20 (4M). Sent out in fragments of 1M.",
    "droppedByMe": false,
-   "duration": 1008,
+   "duration": 1168,
    "expectation": "Receive echo'ed binary message (with payload as sent).",
    "expected": {},
    "expectedClose": {
@@ -19,8 +19,8 @@
       "requireClean": true
    },
    "failedByMe": false,
-   "httpRequest": "GET / HTTP/1.1\r\nUser-Agent: AutobahnTestSuite/0.7.6-0.10.9\r\nHost: 127.0.0.1:3001\r\nUpgrade: WebSocket\r\nConnection: Upgrade\r\nPragma: no-cache\r\nCache-Control: no-cache\r\nSec-WebSocket-Key: MKekb8KgCsvWR+22Dfz4Bw==\r\nSec-WebSocket-Version: 13\r\n\r\n",
-   "httpResponse": "HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Accept: c5BsTBBmgnL3QyvBs1cBb7ZjFdE=\r\n\r\n",
+   "httpRequest": "GET / HTTP/1.1\r\nUser-Agent: AutobahnTestSuite/0.7.6-0.10.9\r\nHost: 127.0.0.1:3001\r\nUpgrade: WebSocket\r\nConnection: Upgrade\r\nPragma: no-cache\r\nCache-Control: no-cache\r\nSec-WebSocket-Key: XZAZh/K7DuypCBMOkhTlGg==\r\nSec-WebSocket-Version: 13\r\n\r\n",
+   "httpResponse": "HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Accept: UeyjnDfXqkffH9NSWMKAln5z/BQ=\r\n\r\n",
    "id": "9.4.8",
    "isServer": false,
    "localCloseCode": 1000,
@@ -41,20 +41,19 @@
       "2": 1,
       "4": 1,
       "129": 1,
-      "1028": 51,
-      "2056": 220,
-      "3084": 234,
-      "4112": 105,
-      "5140": 132,
-      "6168": 102,
-      "7196": 89,
-      "8224": 66,
-      "9252": 3,
-      "10280": 1,
-      "11308": 1,
-      "12336": 1
+      "1028": 87,
+      "2056": 163,
+      "3084": 191,
+      "4112": 148,
+      "5140": 39,
+      "6168": 41,
+      "7196": 81,
+      "8224": 168,
+      "9252": 15,
+      "10280": 2,
+      "11308": 1
    },
-   "started": "2017-05-02T14:38:30.301Z",
+   "started": "2017-05-02T17:31:55.818Z",
    "trafficStats": null,
    "txFrameStats": {
       "0": 4,
@@ -101,7 +100,7 @@
          8,
          true,
          0,
-         "8cdd5834",
+         "b48ff9f8",
          null,
          null,
          false
@@ -110,7 +109,7 @@
          "TO",
          [
             8,
-            "88828cdd58348f35"
+            "8882b48ff9f8b767"
          ],
          false
       ],
