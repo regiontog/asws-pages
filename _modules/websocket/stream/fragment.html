@@ -75,24 +75,25 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">push_task</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">push_task</span><span class="o">.</span><span class="n">done</span><span class="p">():</span>
             <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">push_task</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">push_task</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">ensure_future</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">fragment</span><span class="p">,</span> <span class="n">fin</span><span class="p">),</span> <span class="n">loop</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">loop</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">push_task</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">ensure_future</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_write</span><span class="p">(</span><span class="n">fragment</span><span class="p">,</span> <span class="n">fin</span><span class="p">),</span> <span class="n">loop</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">loop</span><span class="p">)</span>
 
-    <span class="k">async</span> <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fragment</span><span class="p">,</span> <span class="n">fin</span><span class="p">):</span>
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">_write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fragment</span><span class="p">,</span> <span class="n">fin</span><span class="p">):</span>
         <span class="n">op_code</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">first_write</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Start fragment write: fin = </span><span class="si">{fin}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Start fragment _write: fin = </span><span class="si">{fin}</span><span class="s2">&quot;</span><span class="p">)</span>
             <span class="n">op_code</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_type</span><span class="o">.</span><span class="n">value</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">first_write</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Fragment continuation write: fin = </span><span class="si">{fin}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Fragment continuation _write: fin = </span><span class="si">{fin}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">write</span><span class="p">((</span><span class="n">op_code</span> <span class="o">|</span> <span class="n">fin</span> <span class="o">&lt;&lt;</span> <span class="mi">7</span><span class="p">)</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;big&#39;</span><span class="p">))</span>
-        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">raw_send</span><span class="p">(</span><span class="n">fragment</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_type</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">write_frame</span><span class="p">((</span><span class="n">op_code</span> <span class="o">|</span> <span class="n">fin</span> <span class="o">&lt;&lt;</span> <span class="mi">7</span><span class="p">)</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;big&#39;</span><span class="p">),</span> <span class="n">fragment</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">fragment</span><span class="p">))</span>
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">drain</span><span class="p">()</span>
 
 <div class="viewcode-block" id="FragmentContext.send"><a class="viewcode-back" href="../../../modules/fragment.html#websocket.stream.fragment.FragmentContext.send">[docs]</a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">send</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Que a message to be sent, it will be chopped into fragments and accumulated with other fragments</span>
+        <span class="sd">&quot;&quot;&quot;Que a message to be sent.</span>
 <span class="sd">        </span>
-<span class="sd">        :param data: The data you with to send, must be either :class:`str` or :class:`bytes`. </span>
+<span class="sd">        :param data: The data you with to send, must be either :class:`str` or :class:`bytes`.</span>
+<span class="sd">        :type data: either str or bytes</span>
 <span class="sd">        :param force: If true send message even if the connection is closing e.g. we got valid message after having previously been sent a close frame from the client or after having received invalid frame(s) </span>
 <span class="sd">        :type force: bool</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -118,10 +119,12 @@
 
     <span class="k">async</span> <span class="k">def</span> <span class="nf">__aenter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Enter the context manager&quot;&quot;&quot;</span>
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">write_lock</span>
         <span class="k">return</span> <span class="bp">self</span>
 
     <span class="k">async</span> <span class="k">def</span> <span class="nf">__aexit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_val</span><span class="p">,</span> <span class="n">exc_tb</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Exit the context manager&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">write_lock</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">exc_type</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">Break</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">True</span>
 

@@ -57,7 +57,7 @@
 <span class="sd">...         await client.writer.send(await reader.get())</span>
 <span class="sd">...</span>
 <span class="sd">&gt;&gt;&gt; with socket as server:</span>
-<span class="sd">...     logger.info(f&#39;Serving on {server.sockets[0].getsockname()}&#39;)</span>
+<span class="sd">...     print(f&#39;Serving on {server.sockets[0].getsockname()}&#39;)</span>
 <span class="sd">...     loop.run_forever()</span>
 <span class="sd">...</span>
 <span class="sd">&gt;&gt;&gt; loop.close()</span>
@@ -82,7 +82,7 @@
 <span class="sd">    :type addr: str</span>
 <span class="sd">    :ivar port: The server port.</span>
 <span class="sd">    :type port: int</span>
-<span class="sd">    :ivar certs: SSL certifications</span>
+<span class="sd">    :ivar certs: SSL certificates</span>
 <span class="sd">    :type certs: (certfile, keyfile)</span>
 <span class="sd">    :ivar clients: All of the connected clients.</span>
 <span class="sd">    :type clients: {(str, int): Client}</span>
@@ -155,7 +155,7 @@
             <span class="k">for</span> <span class="n">future</span> <span class="ow">in</span> <span class="n">pending</span><span class="p">:</span>
                 <span class="n">future</span><span class="o">.</span><span class="n">cancel</span><span class="p">()</span>
 
-<div class="viewcode-block" id="WebSocketServer.disconnect_client"><a class="viewcode-back" href="../../modules/server.html#websocket.server.WebSocketServer.disconnect_client">[docs]</a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">disconnect_client</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">client</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Reasons</span><span class="o">.</span><span class="n">NORMAL</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">code</span><span class="p">,</span> <span class="n">reason</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="WebSocketServer.disconnect_client"><a class="viewcode-back" href="../../modules/server.html#websocket.server.WebSocketServer.disconnect_client">[docs]</a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">disconnect_client</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">client</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Reasons</span><span class="o">.</span><span class="n">NORMAL</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">code</span><span class="p">,</span> <span class="n">reason</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;This method is the only clean way to close a connection with a client.</span>
 <span class="sd">        </span>
 <span class="sd">        &gt;&gt;&gt; @socket.connection</span>
@@ -163,19 +163,12 @@
 <span class="sd">        ...     print(&quot;Client connected, disconnecting it...&quot;)</span>
 <span class="sd">        ...     socket.disconnect_client(client)</span>
 
-<span class="sd">        :param client: Depends on port parameter.</span>
-<span class="sd">        :param port: If port is None try to disconnect client, else interpret client as the client address</span>
-<span class="sd">        :param code: The code to close the connection with, make sure it is valid. 99% of the time it should be :attr:`websocket.reasons.Reasons.NORMAL.value.code`</span>
+<span class="sd">        :param client: The client to disconnect from the server.</span>
+<span class="sd">        :param code: The code to close the connection with, make sure it is valid. Default is :attr:`websocket.reasons.Reasons.NORMAL.value.code`</span>
 <span class="sd">        :type code: bytes</span>
 <span class="sd">        :param reason: The reason for closing the connection, may be &#39;&#39;. Should not be longer than 123 characters.</span>
 <span class="sd">        :type reason: str</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">port</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">client</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">clients</span><span class="p">[</span><span class="n">client</span><span class="p">,</span> <span class="n">port</span><span class="p">]</span>
-            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-                <span class="k">return</span>  <span class="c1"># Client does not exist, nothing to to</span>
-
         <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">reason</span><span class="p">)</span>
         <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">clients</span><span class="p">[</span><span class="n">client</span><span class="o">.</span><span class="n">addr</span><span class="p">,</span> <span class="n">client</span><span class="o">.</span><span class="n">port</span><span class="p">]</span></div>
 
@@ -235,14 +228,14 @@
 
     <span class="k">async</span> <span class="k">def</span> <span class="nf">handle_handshake</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reader</span><span class="p">,</span> <span class="n">writer</span><span class="p">):</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">request_line</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="n">reader</span><span class="o">.</span><span class="n">readuntil</span><span class="p">(</span><span class="n">WebsocketServer</span><span class="o">.</span><span class="n">NEWLINE</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">request_line</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="n">reader</span><span class="o">.</span><span class="n">readuntil</span><span class="p">(</span><span class="n">WebSocketServer</span><span class="o">.</span><span class="n">NEWLINE</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
 
             <span class="n">request</span> <span class="o">=</span> <span class="n">handshake</span><span class="o">.</span><span class="n">Request</span><span class="p">(</span><span class="n">request_line</span><span class="o">.</span><span class="n">decode</span><span class="p">())</span>
-            <span class="n">header</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="n">reader</span><span class="o">.</span><span class="n">readuntil</span><span class="p">(</span><span class="n">WebsocketServer</span><span class="o">.</span><span class="n">NEWLINE</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">header</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="n">reader</span><span class="o">.</span><span class="n">readuntil</span><span class="p">(</span><span class="n">WebSocketServer</span><span class="o">.</span><span class="n">NEWLINE</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
 
-            <span class="k">while</span> <span class="n">header</span> <span class="o">!=</span> <span class="n">WebsocketServer</span><span class="o">.</span><span class="n">NEWLINE</span><span class="p">:</span>
+            <span class="k">while</span> <span class="n">header</span> <span class="o">!=</span> <span class="n">WebSocketServer</span><span class="o">.</span><span class="n">NEWLINE</span><span class="p">:</span>
                 <span class="n">request</span><span class="o">.</span><span class="n">header</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">decode</span><span class="p">())</span>
-                <span class="n">header</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="n">reader</span><span class="o">.</span><span class="n">readuntil</span><span class="p">(</span><span class="n">WebsocketServer</span><span class="o">.</span><span class="n">NEWLINE</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="n">header</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="n">reader</span><span class="o">.</span><span class="n">readuntil</span><span class="p">(</span><span class="n">WebSocketServer</span><span class="o">.</span><span class="n">NEWLINE</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
 
             <span class="n">response</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">validate_websocket_request</span><span class="p">()</span>
             <span class="n">writer</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>

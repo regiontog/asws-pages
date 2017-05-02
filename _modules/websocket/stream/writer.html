@@ -48,6 +48,7 @@
 
 <span class="sd">&gt;&gt;&gt; client.writer.send(&#39;Hello World!&#39;)</span>
 <span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">asyncio</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 
 <span class="kn">from</span> <span class="nn">.fragment</span> <span class="k">import</span> <span class="n">FragmentContext</span>
@@ -70,10 +71,13 @@
     <span class="n">LENGTH_OVER_7</span> <span class="o">=</span> <span class="n">LENGTH_OVER_7</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;big&#39;</span><span class="p">)</span>
     <span class="n">LENGTH_OVER_16</span> <span class="o">=</span> <span class="n">LENGTH_OVER_16</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;big&#39;</span><span class="p">)</span>
 
+    <span class="n">HEADER_FIN_SET</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">7</span>
+
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">writer</span><span class="p">,</span> <span class="n">loop</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">loop</span> <span class="o">=</span> <span class="n">loop</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">writer</span> <span class="o">=</span> <span class="n">writer</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">closed</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write_lock</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">Lock</span><span class="p">(</span><span class="n">loop</span><span class="o">=</span><span class="n">loop</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">ensure_open</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">force</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">closed</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">force</span><span class="p">:</span>
@@ -84,79 +88,47 @@
         <span class="k">return</span> <span class="kc">True</span>
 
 <div class="viewcode-block" id="WebSocketWriter.send"><a class="viewcode-back" href="../../../modules/writer.html#websocket.stream.writer.WebSocketWriter.send">[docs]</a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">send</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Send a data frame to the client, the type of data is determined from the data parameter.</span>
+        <span class="sd">&quot;&quot;&quot;Send some data to the client, the type of data is determined from the data parameter.</span>
 <span class="sd">        </span>
-<span class="sd">        :param data: The data you with to send, must be either :class:`str` or :class:`bytes`. </span>
+<span class="sd">        :param data: The data you wish to send, must be either :class:`str` or :class:`bytes`. </span>
 <span class="sd">        :param force: If true send message even if the connection is closing e.g. we got valid message after having previously been sent a close frame from the client or after having received invalid frame(s) </span>
 <span class="sd">        :type force: bool</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">ensure_open</span><span class="p">(</span><span class="n">force</span><span class="p">):</span>
-            <span class="k">return</span>
+        <span class="k">with</span> <span class="p">(</span><span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">write_lock</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">ensure_open</span><span class="p">(</span><span class="n">force</span><span class="p">):</span>
+                <span class="k">return</span>
 
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="n">kind</span> <span class="o">=</span> <span class="n">DataType</span><span class="o">.</span><span class="n">TEXT</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">kind</span> <span class="o">=</span> <span class="n">DataType</span><span class="o">.</span><span class="n">BINARY</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="n">kind</span> <span class="o">=</span> <span class="n">DataType</span><span class="o">.</span><span class="n">TEXT</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">kind</span> <span class="o">=</span> <span class="n">DataType</span><span class="o">.</span><span class="n">BINARY</span>
 
-        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Sending {kind.name.lower()} to client.&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">kind</span><span class="o">.</span><span class="n">header</span><span class="p">(</span><span class="mi">8</span><span class="p">))</span>
-        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw_send</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">kind</span><span class="p">)</span></div>
-
-    <span class="k">async</span> <span class="k">def</span> <span class="nf">raw_send</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">kind</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="n">DataType</span><span class="o">.</span><span class="n">TEXT</span><span class="p">:</span>
-            <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span>
-
-        <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">length</span> <span class="o">&gt;</span> <span class="n">WebSocketWriter</span><span class="o">.</span><span class="n">MAX_LEN_64</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Message too big, fragment it.&quot;</span><span class="p">)</span>  <span class="c1"># TODO: Auto fragment it</span>
-        <span class="k">elif</span> <span class="n">length</span> <span class="o">&gt;</span> <span class="n">WebSocketWriter</span><span class="o">.</span><span class="n">MAX_LEN_16</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">WebSocketWriter</span><span class="o">.</span><span class="n">LENGTH_OVER_16</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">length</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="s1">&#39;big&#39;</span><span class="p">))</span>
-        <span class="k">elif</span> <span class="n">length</span> <span class="o">&gt;</span> <span class="n">WebSocketWriter</span><span class="o">.</span><span class="n">MAX_LEN_7</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">WebSocketWriter</span><span class="o">.</span><span class="n">LENGTH_OVER_7</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">length</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;big&#39;</span><span class="p">))</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">length</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;big&#39;</span><span class="p">))</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">drain</span><span class="p">()</span>
-
-<div class="viewcode-block" id="WebSocketWriter.fragment"><a class="viewcode-back" href="../../../modules/writer.html#websocket.stream.writer.WebSocketWriter.fragment">[docs]</a>    <span class="k">def</span> <span class="nf">fragment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chunksize</span><span class="o">=</span><span class="mi">512</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Create a async context manager that can send fragmented messages.</span>
-<span class="sd">        </span>
-<span class="sd">        :param chunksize: The size of each fragment to send.</span>
-<span class="sd">        :type chunksize: int</span>
-<span class="sd">        </span>
-<span class="sd">        :return: :class:`~websocket.stream.fragment.FragmentContext`</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">FragmentContext</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">loop</span><span class="p">)</span></div>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Sending {kind.name.lower()} to client.&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">write_frame</span><span class="p">((</span><span class="n">kind</span><span class="o">.</span><span class="n">value</span> <span class="o">|</span> <span class="n">WebSocketWriter</span><span class="o">.</span><span class="n">HEADER_FIN_SET</span><span class="p">)</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;big&#39;</span><span class="p">),</span> <span class="n">data</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">drain</span><span class="p">()</span></div>
 
     <span class="k">async</span> <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">close_code</span><span class="p">,</span> <span class="n">reason</span><span class="p">):</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Sending close to client.&quot;</span><span class="p">)</span>
+        <span class="k">with</span> <span class="p">(</span><span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">write_lock</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Sending close to client.&quot;</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">close_code</span> <span class="o">==</span> <span class="n">Reasons</span><span class="o">.</span><span class="n">NO_STATUS</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;</span><span class="se">\x88</span><span class="s1">&#39;</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">write</span><span class="p">((</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;big&#39;</span><span class="p">))</span>
-            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">drain</span><span class="p">()</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">data</span> <span class="o">=</span> <span class="n">reason</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span>
-            <span class="n">length</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">close_code</span> <span class="o">==</span> <span class="n">Reasons</span><span class="o">.</span><span class="n">NO_STATUS</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">write_frame</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;</span><span class="se">\x88</span><span class="s1">&#39;</span><span class="p">,</span> <span class="p">[],</span> <span class="mi">0</span><span class="p">)</span>
+                <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">drain</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">reason</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span>
+                <span class="n">length</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 
-            <span class="k">if</span> <span class="n">length</span> <span class="o">&gt;</span> <span class="n">WebSocketWriter</span><span class="o">.</span><span class="n">MAX_LEN_7</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Control frames(close) may not be over </span><span class="si">{WebSocketWriter.MAX_LEN_7}</span><span class="s2"> bytes.&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">length</span> <span class="o">&gt;</span> <span class="n">WebSocketWriter</span><span class="o">.</span><span class="n">MAX_LEN_7</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Control frames(close) may not be over </span><span class="si">{WebSocketWriter.MAX_LEN_7}</span><span class="s2"> bytes.&quot;</span><span class="p">)</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;</span><span class="se">\x88</span><span class="s1">&#39;</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">length</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;big&#39;</span><span class="p">))</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">close_code</span><span class="o">.</span><span class="n">code</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">drain</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">write_frame</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;</span><span class="se">\x88</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">b</span><span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">close_code</span><span class="o">.</span><span class="n">code</span><span class="p">,</span> <span class="n">data</span><span class="p">]),</span> <span class="n">length</span><span class="p">)</span>
+                <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">drain</span><span class="p">()</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">closed</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">closed</span> <span class="o">=</span> <span class="kc">True</span>
 
 <div class="viewcode-block" id="WebSocketWriter.ping"><a class="viewcode-back" href="../../../modules/writer.html#websocket.stream.writer.WebSocketWriter.ping">[docs]</a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">ping</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">payload</span><span class="o">=</span><span class="sa">b</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Send a ping to the client.</span>
-<span class="sd">        </span>
+
 <span class="sd">        :param payload: The payload to send with the ping.</span>
 <span class="sd">        :type payload: bytes</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -166,9 +138,7 @@
         <span class="k">if</span> <span class="n">length</span> <span class="o">&gt;</span> <span class="n">WebSocketWriter</span><span class="o">.</span><span class="n">MAX_LEN_7</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Control frames(ping) may not be over </span><span class="si">{WebSocketWriter.MAX_LEN_7}</span><span class="s2"> bytes.&quot;</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;</span><span class="se">\x89</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">length</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;big&#39;</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write_frame</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;</span><span class="se">\x89</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">payload</span><span class="p">,</span> <span class="n">length</span><span class="p">)</span>
         <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">drain</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="WebSocketWriter.pong"><a class="viewcode-back" href="../../../modules/writer.html#websocket.stream.writer.WebSocketWriter.pong">[docs]</a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">pong</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">payload</span><span class="p">):</span>
@@ -180,10 +150,80 @@
 <span class="sd">        :type length: int</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Sending pong to client.&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;</span><span class="se">\x8A</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">length</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;big&#39;</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
-        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">drain</span><span class="p">()</span></div></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write_frame</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;</span><span class="se">\x8A</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">payload</span><span class="p">,</span> <span class="n">length</span><span class="p">)</span>
+        <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">drain</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="WebSocketWriter.write_frame"><a class="viewcode-back" href="../../../modules/writer.html#websocket.stream.writer.WebSocketWriter.write_frame">[docs]</a>    <span class="k">def</span> <span class="nf">write_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">header</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">length</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Low level method to write a frame to the client, does not flush.</span>
+<span class="sd">        </span>
+<span class="sd">        :param header: The frame header, containing the frame type and the fin bit </span>
+<span class="sd">        :param data:  The data to include in the frame</span>
+<span class="sd">        :param length:  The length of the data</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">frame</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">length</span> <span class="o">&gt;</span> <span class="n">WebSocketWriter</span><span class="o">.</span><span class="n">MAX_LEN_64</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Message too big, fragment it.&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">length</span> <span class="o">&gt;</span> <span class="n">WebSocketWriter</span><span class="o">.</span><span class="n">MAX_LEN_16</span><span class="p">:</span>
+            <span class="n">frame</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">WebSocketWriter</span><span class="o">.</span><span class="n">LENGTH_OVER_16</span><span class="p">)</span>
+            <span class="n">frame</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">length</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="s1">&#39;big&#39;</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="n">length</span> <span class="o">&gt;</span> <span class="n">WebSocketWriter</span><span class="o">.</span><span class="n">MAX_LEN_7</span><span class="p">:</span>
+            <span class="n">frame</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">WebSocketWriter</span><span class="o">.</span><span class="n">LENGTH_OVER_7</span><span class="p">)</span>
+            <span class="n">frame</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">length</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;big&#39;</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">frame</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">length</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;big&#39;</span><span class="p">))</span>
+
+        <span class="n">frame</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="WebSocketWriter.fragment"><a class="viewcode-back" href="../../../modules/writer.html#websocket.stream.writer.WebSocketWriter.fragment">[docs]</a>    <span class="k">def</span> <span class="nf">fragment</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create a async context manager that can send fragmented messages.</span>
+<span class="sd">        </span>
+<span class="sd">        :return: :class:`~websocket.stream.fragment.FragmentContext`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">FragmentContext</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">loop</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="WebSocketWriter.feed"><a class="viewcode-back" href="../../../modules/writer.html#websocket.stream.writer.WebSocketWriter.feed">[docs]</a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">feed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buffer</span><span class="p">,</span> <span class="n">op_code</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">chunksize</span><span class="o">=</span><span class="mi">1024</span><span class="p">,</span> <span class="n">drain_every</span><span class="o">=</span><span class="mi">4096</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Feed the contents of a :class:`~websocket.stream.buffer.Buffer` to the client in `chunksize` fragments.</span>
+<span class="sd">        </span>
+<span class="sd">        :param buffer: The buffer to read from</span>
+<span class="sd">        :type buffer: Buffer</span>
+<span class="sd">        :param op_code: The type of data to send, see :class:`~websocket.enums.DataType`, if None try to read buffer.data_type as if buffer was a :class:`~websocket.stream.reader.WebSocketReader`</span>
+<span class="sd">        :type op_code: int</span>
+<span class="sd">        :param chunksize: The size of each fragment</span>
+<span class="sd">        :type chunksize: int</span>
+<span class="sd">        :param drain_every: How often we forcefully drain the writer</span>
+<span class="sd">        :type drain_every: int</span>
+<span class="sd">        :param force: If true send message even if the connection is closing e.g. we got valid message after having previously been sent a close frame from the client or after having received invalid frame(s) </span>
+<span class="sd">        :type force: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">(</span><span class="n">chunksize</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">op_code</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">op_code</span> <span class="o">=</span> <span class="n">buffer</span><span class="o">.</span><span class="n">data_type</span><span class="o">.</span><span class="n">value</span>
+
+        <span class="k">with</span> <span class="p">(</span><span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">write_lock</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">ensure_open</span><span class="p">(</span><span class="n">force</span><span class="p">):</span>
+                <span class="k">return</span>
+
+            <span class="n">written_since_drain</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="k">await</span> <span class="n">buffer</span><span class="o">.</span><span class="n">read_into</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">chunksize</span><span class="p">)</span>
+            <span class="n">fin</span> <span class="o">=</span> <span class="n">buffer</span><span class="o">.</span><span class="n">at_eof</span><span class="p">()</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">write_frame</span><span class="p">((</span><span class="n">op_code</span> <span class="o">|</span> <span class="n">fin</span> <span class="o">&lt;&lt;</span> <span class="mi">7</span><span class="p">)</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;big&#39;</span><span class="p">),</span> <span class="n">data</span><span class="p">[:</span><span class="n">length</span><span class="p">],</span> <span class="n">length</span><span class="p">)</span>
+            <span class="n">written_since_drain</span> <span class="o">+=</span> <span class="n">length</span>
+
+            <span class="k">while</span> <span class="ow">not</span> <span class="n">fin</span><span class="p">:</span>
+                <span class="n">length</span> <span class="o">=</span> <span class="k">await</span> <span class="n">buffer</span><span class="o">.</span><span class="n">read_into</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">chunksize</span><span class="p">)</span>
+                <span class="n">fin</span> <span class="o">=</span> <span class="n">buffer</span><span class="o">.</span><span class="n">at_eof</span><span class="p">()</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">write_frame</span><span class="p">((</span><span class="n">fin</span> <span class="o">&lt;&lt;</span> <span class="mi">7</span><span class="p">)</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;big&#39;</span><span class="p">),</span> <span class="n">data</span><span class="p">[:</span><span class="n">length</span><span class="p">],</span> <span class="n">length</span><span class="p">)</span>
+                <span class="n">written_since_drain</span> <span class="o">+=</span> <span class="n">length</span>
+                <span class="k">if</span> <span class="n">written_since_drain</span> <span class="o">&gt;</span> <span class="n">drain_every</span><span class="p">:</span>
+                    <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">drain</span><span class="p">()</span>
+                    <span class="n">written_since_drain</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">drain</span><span class="p">()</span></div></div>
 </pre></div>
 
           </div>

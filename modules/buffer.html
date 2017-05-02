@@ -1,0 +1,211 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Buffer &#8212; asws 1.0.0a documentation</title>
+    
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '1.0.0a',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Client" href="client.html" />
+    <link rel="prev" title="Welcome to asws’s documentation!" href="../index.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-websocket.stream.buffer">
+<span id="buffer"></span><h1>Buffer<a class="headerlink" href="#module-websocket.stream.buffer" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="websocket.stream.buffer.Buffer">
+<em class="property">class </em><code class="descclassname">websocket.stream.buffer.</code><code class="descname">Buffer</code><span class="sig-paren">(</span><em>limit</em>, <em>loop</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/websocket/stream/buffer.html#Buffer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#websocket.stream.buffer.Buffer" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="websocket.stream.buffer.Buffer.at_eof">
+<code class="descname">at_eof</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/websocket/stream/buffer.html#Buffer.at_eof"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#websocket.stream.buffer.Buffer.at_eof" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True iff there is no more data to read AND we have been fed <cite>end of file</cite>.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="websocket.stream.buffer.Buffer.empty">
+<code class="descname">empty</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/websocket/stream/buffer.html#Buffer.empty"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#websocket.stream.buffer.Buffer.empty" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True iff there is no more data to read.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="websocket.stream.buffer.Buffer.feed_eof">
+<code class="descname">feed_eof</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/websocket/stream/buffer.html#Buffer.feed_eof"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#websocket.stream.buffer.Buffer.feed_eof" title="Permalink to this definition">¶</a></dt>
+<dd><p>Feed the buffer with <cite>end of file</cite></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="websocket.stream.buffer.Buffer.read">
+<code class="descname">read</code><span class="sig-paren">(</span><em>n=-1</em>, <em>chunksize=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/websocket/stream/buffer.html#Buffer.read"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#websocket.stream.buffer.Buffer.read" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read data from the buffer. Reads until eof or n bytes.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>n</strong> &#8211; The amount of data to read.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A <a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bytearray" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">bytearray</span></code></a> with the data</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="websocket.stream.buffer.Buffer.read_into">
+<code class="descname">read_into</code><span class="sig-paren">(</span><em>buffer</em>, <em>n</em>, <em>offset=0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/websocket/stream/buffer.html#Buffer.read_into"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#websocket.stream.buffer.Buffer.read_into" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read data from the buffer into a bytearray. Reads until eof or n bytes.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>buffer</strong> &#8211; The bytearray to write the data into.</li>
+<li><strong>n</strong> &#8211; The amount of data to read.</li>
+<li><strong>offset</strong> &#8211; The index into buffer to write to.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="websocket.stream.buffer.Buffer.read_into_exactly">
+<code class="descname">read_into_exactly</code><span class="sig-paren">(</span><em>buffer</em>, <em>n</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/websocket/stream/buffer.html#Buffer.read_into_exactly"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#websocket.stream.buffer.Buffer.read_into_exactly" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read data from the buffer into a bytearray. Reads n bytes or throws an exception if reading eof.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>buffer</strong> &#8211; The bytearray to write the data into.</li>
+<li><strong>n</strong> &#8211; The amount of data to read.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="websocket.stream.buffer.Buffer.set_exception">
+<code class="descname">set_exception</code><span class="sig-paren">(</span><em>exc</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/websocket/stream/buffer.html#Buffer.set_exception"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#websocket.stream.buffer.Buffer.set_exception" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set an exception to raise at next read.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="websocket.stream.buffer.Buffer.write">
+<code class="descname">write</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/websocket/stream/buffer.html#Buffer.write"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#websocket.stream.buffer.Buffer.write" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write some data to the buffer, length must not exceed the buffer limit, or else it will block forever.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> (<em>iterable of bytes</em>) &#8211; The data to write</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="../index.html" title="previous chapter">Welcome to asws&#8217;s documentation!</a></li>
+      <li>Next: <a href="client.html" title="next chapter">Client</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/modules/buffer.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Erlend Tobiassen.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.5.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="../_sources/modules/buffer.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
