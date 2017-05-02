@@ -123,7 +123,7 @@ We can do this with the <a class="reference external" href="https://docs.python.
 <div class="section" id="the-client-object">
 <h2>The client object<a class="headerlink" href="#the-client-object" title="Permalink to this headline">¶</a></h2>
 <p>If we look back at <a class="reference internal" href="modules/server.html#websocket.server.WebSocketServer.connection" title="websocket.server.WebSocketServer.connection"><code class="xref py py-meth docutils literal"><span class="pre">connection()</span></code></a>
-<a class="reference external" href="https://realpython.com/blog/python/primer-on-python-decorators/">decorator</a>., we see that the callback accepts the <a class="reference external" href="https://docs.python.org/3.6/library/asyncio-eventloop.html#asyncio.Server" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">Server</span></code></a> class.
+<a class="reference external" href="https://realpython.com/blog/python/primer-on-python-decorators/">decorator</a>, we see that the callback accepts the <a class="reference external" href="https://docs.python.org/3.6/library/asyncio-eventloop.html#asyncio.Server" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">Server</span></code></a> class.
 This class has 3 interesting attributes, <code class="xref py py-attr docutils literal"><span class="pre">addr</span></code>, <code class="xref py py-attr docutils literal"><span class="pre">port</span></code>, and <code class="xref py py-attr docutils literal"><span class="pre">writer</span></code>.
 The first two answer to the address and port of the remote socket. We can use these to identify each client.</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="nd">@socket</span><span class="o">.</span><span class="n">connection</span>
@@ -132,7 +132,7 @@ The first two answer to the address and port of the remote socket. We can use th
 </pre></div>
 </div>
 <p>The <code class="xref py py-attr docutils literal"><span class="pre">writer</span></code> is used to send messages to the client and we&#8217;ll look closer at it soon.</p>
-<p>We can access all connected clients through <code class="xref py py-attr docutils literal"><span class="pre">clients</span></code> this <a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#dict" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">dict</span></code></a> the key to each client is the tuple <cite>(client.addr, client.port)</cite>.
+<p>We can access all connected clients through <code class="xref py py-attr docutils literal"><span class="pre">clients</span></code>. This <a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#dict" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">dict</span></code></a> the key to each client is the tuple <cite>(client.addr, client.port)</cite>.
 In particular before the on_connection callback is finished it contains all clients but the newly connected one.</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="nd">@socket</span><span class="o">.</span><span class="n">connection</span>
     <span class="k">async</span> <span class="k">def</span> <span class="nf">on_connection</span><span class="p">(</span><span class="n">client</span><span class="p">:</span> <span class="n">Client</span><span class="p">):</span>
