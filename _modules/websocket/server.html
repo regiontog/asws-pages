@@ -125,7 +125,7 @@
                         <span class="bp">self</span><span class="o">.</span><span class="n">disconnect_client</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Reasons</span><span class="o">.</span><span class="n">POLICY_VIOLATION</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">code</span><span class="p">,</span>
                                                <span class="n">reason</span><span class="o">=</span><span class="s1">&#39;Client did not respond to heartbeat.&#39;</span><span class="p">)</span>
 
-                    <span class="k">elif</span> <span class="n">diff</span> <span class="o">&gt;</span> <span class="mi">60</span><span class="p">:</span>
+                    <span class="k">elif</span> <span class="n">diff</span> <span class="o">&gt;</span> <span class="n">half</span><span class="p">:</span>
                         <span class="n">client</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">ping</span><span class="p">(</span><span class="s1">&#39;heartbeat&#39;</span><span class="p">)</span>
 
         <span class="k">except</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">CancelledError</span><span class="p">:</span>

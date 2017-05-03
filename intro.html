@@ -105,9 +105,9 @@ The first two answer to the address and port of the remote socket. We can use th
 <p>We can access all connected clients through <code class="xref py py-attr docutils literal"><span class="pre">clients</span></code>. This <a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#dict" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">dict</span></code></a> the key to each client is the tuple <cite>(client.addr, client.port)</cite>.
 In particular before the on_connection callback is finished it contains all clients but the newly connected one.</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="nd">@socket</span><span class="o">.</span><span class="n">connection</span>
-    <span class="k">async</span> <span class="k">def</span> <span class="nf">on_connection</span><span class="p">(</span><span class="n">client</span><span class="p">:</span> <span class="n">Client</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">other</span> <span class="ow">in</span> <span class="n">socket</span><span class="o">.</span><span class="n">clients</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-            <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Client {other.addr, other.port} was connected before {client.addr, client.port}&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span> <span class="nf">on_connection</span><span class="p">(</span><span class="n">client</span><span class="p">:</span> <span class="n">Client</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">other</span> <span class="ow">in</span> <span class="n">socket</span><span class="o">.</span><span class="n">clients</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Client {other.addr, other.port} was connected before {client.addr, client.port}&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -117,10 +117,10 @@ In particular before the on_connection callback is finished it contains all clie
 We do this with <a class="reference internal" href="modules/client.html#websocket.client.Client.message" title="websocket.client.Client.message"><code class="xref py py-meth docutils literal"><span class="pre">message()</span></code></a> <a class="reference external" href="https://realpython.com/blog/python/primer-on-python-decorators/">decorator</a>.
 The callback parameter is a <a class="reference internal" href="modules/reader.html#websocket.stream.reader.WebSocketReader" title="websocket.stream.reader.WebSocketReader"><code class="xref py py-class docutils literal"><span class="pre">WebSocketReader</span></code></a> class.</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="nd">@socket</span><span class="o">.</span><span class="n">connection</span>
-    <span class="k">async</span> <span class="k">def</span> <span class="nf">on_connection</span><span class="p">(</span><span class="n">client</span><span class="p">:</span> <span class="n">Client</span><span class="p">):</span>
-        <span class="nd">@client</span><span class="o">.</span><span class="n">message</span>
-            <span class="k">async</span> <span class="k">def</span> <span class="nf">on_message</span><span class="p">(</span><span class="n">reader</span><span class="p">:</span> <span class="n">WebSocketReader</span><span class="p">):</span>
-                <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;The client {client.addr, client.port} sent an message.&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span> <span class="nf">on_connection</span><span class="p">(</span><span class="n">client</span><span class="p">:</span> <span class="n">Client</span><span class="p">):</span>
+    <span class="nd">@client</span><span class="o">.</span><span class="n">message</span>
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">on_message</span><span class="p">(</span><span class="n">reader</span><span class="p">:</span> <span class="n">WebSocketReader</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;The client {client.addr, client.port} sent an message.&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -129,9 +129,9 @@ The callback parameter is a <a class="reference internal" href="modules/reader.h
 <p>The <a class="reference internal" href="modules/reader.html#websocket.stream.reader.WebSocketReader" title="websocket.stream.reader.WebSocketReader"><code class="xref py py-class docutils literal"><span class="pre">WebSocketReader</span></code></a> class inherits some low level read methods from it&#8217;s superclass <a class="reference internal" href="modules/buffer.html#websocket.stream.buffer.Buffer" title="websocket.stream.buffer.Buffer"><code class="xref py py-class docutils literal"><span class="pre">Buffer</span></code></a>,
 if you want to read bytes. Otherwise the method <a class="reference internal" href="modules/reader.html#websocket.stream.reader.WebSocketReader.get" title="websocket.stream.reader.WebSocketReader.get"><code class="xref py py-meth docutils literal"><span class="pre">get()</span></code></a> is useful for reading either <a class="reference external" href="https://docs.python.org/3.6/library/functions.html#bytes" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">bytes</span></code></a> or <a class="reference external" href="https://docs.python.org/3.6/library/stdtypes.html#str" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a>.</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="nd">@client</span><span class="o">.</span><span class="n">message</span>
-    <span class="k">async</span> <span class="k">def</span> <span class="nf">on_message</span><span class="p">(</span><span class="n">reader</span><span class="p">:</span> <span class="n">WebSocketReader</span><span class="p">):</span>
-        <span class="n">msg</span> <span class="o">=</span> <span class="k">await</span> <span class="n">reader</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;The client {client.addr, client.port} sent the message </span><span class="si">{msg}</span><span class="s2">.&quot;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span> <span class="nf">on_message</span><span class="p">(</span><span class="n">reader</span><span class="p">:</span> <span class="n">WebSocketReader</span><span class="p">):</span>
+    <span class="n">msg</span> <span class="o">=</span> <span class="k">await</span> <span class="n">reader</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;The client {client.addr, client.port} sent the message </span><span class="si">{msg}</span><span class="s2">.&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -143,18 +143,18 @@ if you want to read bytes. Otherwise the method <a class="reference internal" hr
 <p>Just like we could receive messages with <a class="reference internal" href="modules/reader.html#websocket.stream.reader.WebSocketReader.get" title="websocket.stream.reader.WebSocketReader.get"><code class="xref py py-meth docutils literal"><span class="pre">get()</span></code></a> we can send messages with <a class="reference internal" href="modules/writer.html#websocket.stream.writer.WebSocketWriter.send" title="websocket.stream.writer.WebSocketWriter.send"><code class="xref py py-meth docutils literal"><span class="pre">send()</span></code></a>.
 <a class="reference internal" href="modules/writer.html#websocket.stream.writer.WebSocketWriter.send" title="websocket.stream.writer.WebSocketWriter.send"><code class="xref py py-meth docutils literal"><span class="pre">send()</span></code></a> will automatically look at the data you give it and send the correct data frame.</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="nd">@socket</span><span class="o">.</span><span class="n">connection</span>
-    <span class="k">async</span> <span class="k">def</span> <span class="nf">on_connection</span><span class="p">(</span><span class="n">client</span><span class="p">:</span> <span class="n">Client</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">other</span> <span class="ow">in</span> <span class="n">socket</span><span class="o">.</span><span class="n">clients</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-            <span class="k">await</span> <span class="n">other</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s1">&#39;You are a client connected to my server.&#39;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span> <span class="nf">on_connection</span><span class="p">(</span><span class="n">client</span><span class="p">:</span> <span class="n">Client</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">other</span> <span class="ow">in</span> <span class="n">socket</span><span class="o">.</span><span class="n">clients</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+        <span class="k">await</span> <span class="n">other</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s1">&#39;You are a client connected to my server.&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="nd">@socket</span><span class="o">.</span><span class="n">connection</span>
-    <span class="k">async</span> <span class="k">def</span> <span class="nf">on_connection</span><span class="p">(</span><span class="n">client</span><span class="p">:</span> <span class="n">Client</span><span class="p">):</span>
-        <span class="nd">@client</span><span class="o">.</span><span class="n">message</span>
-            <span class="k">async</span> <span class="k">def</span> <span class="nf">on_message</span><span class="p">(</span><span class="n">reader</span><span class="p">:</span> <span class="n">WebSocketReader</span><span class="p">):</span>
-            <span class="n">msg</span> <span class="o">=</span> <span class="k">await</span> <span class="n">reader</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
-            <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s1">&#39;You just send me the following message.&#39;</span><span class="p">)</span>
-            <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span> <span class="nf">on_connection</span><span class="p">(</span><span class="n">client</span><span class="p">:</span> <span class="n">Client</span><span class="p">):</span>
+    <span class="nd">@client</span><span class="o">.</span><span class="n">message</span>
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">on_message</span><span class="p">(</span><span class="n">reader</span><span class="p">:</span> <span class="n">WebSocketReader</span><span class="p">):</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="k">await</span> <span class="n">reader</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+        <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s1">&#39;You just send me the following message.&#39;</span><span class="p">)</span>
+        <span class="k">await</span> <span class="n">client</span><span class="o">.</span><span class="n">writer</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
